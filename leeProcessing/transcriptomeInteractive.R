@@ -47,10 +47,13 @@ renameFlag <- FALSE
 cellsSelection <- NULL
 genes <- c()
 newGenes <- c()
-libraryNames <- c()
+tsInfoReduce <- tsSuper$ts_info[with(tsSuper$ts_info, order(Cell.type, Experiment)),,drop=F ]
+cellsSelection <- as.character(tsSuper$ts_info$Cell.type)
+libraryNames <- row.names(tsInfoReduce)
 cellRepOptions <- c("Gnomex.Label", "Experiment", "Cell.type", "rd.name", 'Cell.name')
 cellRep <- c('Gnomex.Label', 'Cell.type', 'Experiment')
 newLibraryNames <- c()
+logFlag <- FALSE
 
 for(i in 1:length(cellRep)){
     newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
@@ -59,16 +62,30 @@ for(i in 1:length(cellRep)){
 
 length(genes)
 while(keyPressed != 'q'){
+    # Update the heatmap, this also makes the matrix of 
+    # genes vs cell_types
+    if(renameFlag){
+        newLibraryNames <- c()
+        for(i in 1:length(cellRep)){
+            newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
+        }
+    }
 
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(heatMapFlag){
         if(length(genes) > 0 & length(libraryNames) > 0){
-            geneDF <- tsSuper$ts_data[libraryNames, genes]
-            row.names(geneDF) <- newLibraryNames
-            cat('\nI\'m busy plotting, my friend\n')
+            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% newGenes ],drop=F]
+            geneDF <- apply(geneDF, 2, rev)
+            row.names(geneDF) <- rev(newLibraryNames)
             dev.set(hmWindow)
-            heatmap(geneDF, NA, NA)           
+            if(logFlag){
+                newDF <- log(geneDF)
+                newDF[newDF == '-Inf'] <- 0
+                heatmap(newDF, Rowv = NA, Colv = NA)
+            }else{
+                heatmap(geneDF, Rowv = NA, Colv = NA)
+            }     
             dev.set(tsWindow)
             heatMapFlag <- FALSE
         }
@@ -99,6 +116,7 @@ while(keyPressed != 'q'){
     if(keyPressed == 'g'){
         toSearch <- searchSelector()
         genes <- geneFinder(toSearch)
+        newGenes <- genes
         cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
         cat(genes, sep=" ")
         renameFlag <- TRUE
@@ -109,14 +127,13 @@ while(keyPressed != 'q'){
     if(keyPressed == 'G'){
         cat('\nSelect a subset of genes from this list of genes\nRemeber you can press cancel to return the same genes\n')
         tryCatch(
-            newGenes <- select.list(genes, multiple=T),
+            newGenes <- select.list(genes, newGenes, multiple=T),
             error=function(e){
                 cat('\nThere are no genes selected, make sure to press "g" first\n')
             }
         )
-
         # If cancel was selected return all genes
-        if(is.null(newGenes)){
+        if(length(newGenes) == 0){
             newGenes <- genes
         }
         renameFlag <- TRUE
@@ -125,11 +142,12 @@ while(keyPressed != 'q'){
 
     #' @param h make html heatmap
     if(keyPressed == 'h'){
+        cat('\nI\'m busy plotting, my friend\n')
+        geneDF <- apply(geneDF, 2, rev)
         heatMapper(geneDF)
         print(get('cf', .GlobalEnv))
     }
 
-    
     #' @param r Represent Cells with Different Names
     if(keyPressed == 'r'){
         if(length(tsInfoReduce) > 0){
@@ -139,15 +157,11 @@ while(keyPressed != 'q'){
             if(length(cellRep) == 0){
                 cellRep <- cellRepOptions
             }
-        newLibraryNames <- c()
-
-        for(i in 1:length(cellRep)){
-            newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
-        }
-
         }else{
             cat("\nPress d to select data to work with\n")
         }
+        renameFlag <- TRUE
+        heatMapFlag <- TRUE
 
     }
 
@@ -163,11 +177,32 @@ while(keyPressed != 'q'){
 
     #' @param ctrl-S Save the gene list you have updated 
     if(keyPressed == 'ctrl-S'){
-        write.csv()
+        geneFileName <- scan(n=1, what='character')
+        geneFileName <- paste0("./searches/", geneFileName, '.txt')
+        write.table(genes[ genes %in% newGenes ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
+    }
+    
+    #' @param normalization Save the gene list you have updated 
+    if(keyPressed == 'n'){
+        heatMapNormOptions <-  c("row", "column", "none", "log")
+        cat('\nHow would you like to scale the heatmap?\n')
+        
+        newOptions <- select.list(heatMapNormOptions, multiple=F, "Normalization")
+        if(newOptions != "log"){
+            formals(heatmap)$scale <- newOptions
+        }else{
+            logFlag <- TRUE
+        }
+        
+        heatMapFlag <- TRUE 
 
     }
 
-
-
 }
 
+
+newDF <- log2(geneDF)
+
+newDF[newDF == '-Inf'] <- 0
+
+heatmap(newDF)

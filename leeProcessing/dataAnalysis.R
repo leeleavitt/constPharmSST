@@ -8,7 +8,7 @@ source("./leeProcessing/transcriptome_pharmer.r")
 tsInfoRed <- dataSelector(expSel = T)
 
 libraryNames <- row.names(tsInfoRed)
-newLibraryNames <- paste0(tsInfoRed$Gnomex.Label,'__',tsInfoRed$Cell.type,'__', tsInfoRed$Experiment)
+newLibraryNames <- paste0(tsInfoRed$Gnomex.Label,'__',tsInfoRed$label_cellType,'__', tsInfoRed$label_experiment)
 
 # I need to make a function that looks at the input 
 # If the input doesn't return genes then us Gene.Go.Finder

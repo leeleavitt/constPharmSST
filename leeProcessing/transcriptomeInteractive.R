@@ -15,7 +15,6 @@ onKeybd <- function(key){
     keyPressed <<- key
 }
 
-
 #' Function to interactively change the data selected
 #' 
 #' 
@@ -29,35 +28,73 @@ dev.new(width = 5 , height = 5)
 tsWindow <- dev.cur()
 par( mar=c(0,0,0,0),xaxt='n', yaxt='n' )
 plot(0,0, xlim = c(-10,10), ylim=c(-10,10), pch='')
-text(0,0, "Welcome to the Transcriptome Surfer", cex=2, font=2)
+text(0,0, "Welcome\nto the\nTranscriptome Surfer", cex=2, font=2)
 
 # Open the heatmap window
 dev.new(width = 8, height = 6)
 hmWindow <- dev.cur()
 
-
-
 dev.set(tsWindow)
+
+############################################
 # Initialize default values.
 tsInfoReduce <- tsSuper$ts_info
 
 keyPressed <- 'z'
+# Whether the heatmap should be plotted
 heatMapFlag <- FALSE
+# Renaming of the Cell_types
 renameFlag <- FALSE
 cellsSelection <- NULL
-genes <- c()
-newGenes <- c()
-tsInfoReduce <- tsSuper$ts_info[with(tsSuper$ts_info, order(Cell.type, Experiment)),,drop=F ]
-cellsSelection <- as.character(tsSuper$ts_info$Cell.type)
-libraryNames <- row.names(tsInfoReduce)
-cellRepOptions <- c("Gnomex.Label", "Experiment", "Cell.type", "rd.name", 'Cell.name')
-cellRep <- c('Gnomex.Label', 'Cell.type', 'Experiment')
-newLibraryNames <- c()
-logFlag <- FALSE
 
+# Make empty vectors for the genes and geneSubset
+genes <- c()
+geneSubset <- c()
+
+# Now initialize our transcriptome information
+tsInfoReduce <- tsSuper$ts_info[with(tsSuper$ts_info, order(label_cellType, label_experiment)),,drop=F ]
+tsInfoReduce$label_cellType <- factor(tsInfoReduce$label_cellType)
+
+# This is a setting which is default selected cells.
+cellsSelection <- as.character(tsSuper$ts_info$label_cellType)
+# This is the name of the librarys, this is consistent across ts_info and ts_data
+libraryNames <- row.names(tsInfoReduce)
+
+# Options for how to represent the cells
+cellRepOptions <- c("Gnomex.Label", "label_experiment", "label_cellType", "rd.name", 'Cell.name')
+# Default represenation of the cells.
+cellRep <- c('Gnomex.Label', 'label_cellType', 'label_experiment')
+# Make the new cell representaion
+newLibraryNames <- c()
 for(i in 1:length(cellRep)){
     newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
 }
+
+# Default value for log normalization applied to heatmap.
+logFlag <- FALSE
+
+# # 
+# newOrder <- as.character(tsInfoReduce$Gnomex.Label)
+# tsSuper$ts_data <- tsSuper$ts_data[newOrder,]
+
+
+# boxplot based on selected factors
+tsBoxPlot <- function(){
+    
+}
+gene = 'Pvalb'
+
+boxLabels <- paste0(newLibraryNames, " : n=", as.character(summary(tsInfoReduce$label_cellType)) )
+
+factor(paste0(tsInfoReduce$label_experiment))
+boxplot(
+    tsSuper$ts_data[libraryNames, gene] ~ factor( tsInfoReduce$label_experiment),
+    bty = 'l',
+    xlab = '',
+    xaxs = 'n'
+    )
+
+
 
 
 length(genes)
@@ -75,13 +112,12 @@ while(keyPressed != 'q'){
     # genes vs cell_types
     if(heatMapFlag){
         if(length(genes) > 0 & length(libraryNames) > 0){
-            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% newGenes ],drop=F]
+            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
             geneDF <- apply(geneDF, 2, rev)
             row.names(geneDF) <- rev(newLibraryNames)
             dev.set(hmWindow)
             if(logFlag){
-                newDF <- log(geneDF)
-                newDF[newDF == '-Inf'] <- 0
+                newDF <- log(geneDF+1)
                 heatmap(newDF, Rowv = NA, Colv = NA)
             }else{
                 heatmap(geneDF, Rowv = NA, Colv = NA)
@@ -116,7 +152,7 @@ while(keyPressed != 'q'){
     if(keyPressed == 'g'){
         toSearch <- searchSelector()
         genes <- geneFinder(toSearch)
-        newGenes <- genes
+        geneSubset <- genes
         cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
         cat(genes, sep=" ")
         renameFlag <- TRUE
@@ -127,14 +163,14 @@ while(keyPressed != 'q'){
     if(keyPressed == 'G'){
         cat('\nSelect a subset of genes from this list of genes\nRemeber you can press cancel to return the same genes\n')
         tryCatch(
-            newGenes <- select.list(genes, newGenes, multiple=T),
+            geneSubset <- select.list(genes, geneSubset, multiple=T),
             error=function(e){
                 cat('\nThere are no genes selected, make sure to press "g" first\n')
             }
         )
         # If cancel was selected return all genes
-        if(length(newGenes) == 0){
-            newGenes <- genes
+        if(length(geneSubset) == 0){
+            geneSubset <- genes
         }
         renameFlag <- TRUE
         heatMapFlag <- TRUE
@@ -167,10 +203,11 @@ while(keyPressed != 'q'){
 
     #' @param s Save the Current geneDF as a csv to continue work outside
     if(keyPressed == 's'){
-        if(!in.null(geneDF)){
+        if(!is.null(geneDF)){
             cat('\nPlease enter the name of the file\n')
             fileName <- scan(n=1,what='character', quiet=TRUE)
             fileName <- paste0("./savedFiles/",fileName,'.csv')
+            geneDF <- apply(geneDF, 2, rev)
             write.csv(geneDF,file = fileName)
         }
     }
@@ -179,7 +216,7 @@ while(keyPressed != 'q'){
     if(keyPressed == 'ctrl-S'){
         geneFileName <- scan(n=1, what='character')
         geneFileName <- paste0("./searches/", geneFileName, '.txt')
-        write.table(genes[ genes %in% newGenes ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
+        write.table(genes[ genes %in% geneSubset ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
     }
     
     #' @param normalization Save the gene list you have updated 
@@ -187,11 +224,12 @@ while(keyPressed != 'q'){
         heatMapNormOptions <-  c("row", "column", "none", "log")
         cat('\nHow would you like to scale the heatmap?\n')
         
-        newOptions <- select.list(heatMapNormOptions, multiple=F, "Normalization")
-        if(newOptions != "log"){
+        newOptions <- select.list(heatMapNormOptions, multiple=T, "Normalization")
+        if('log' %in% newOptions){
+            logFlag <- TRUE
             formals(heatmap)$scale <- newOptions
         }else{
-            logFlag <- TRUE
+            logFlag <- FALSE
         }
         
         heatMapFlag <- TRUE 
@@ -201,8 +239,3 @@ while(keyPressed != 'q'){
 }
 
 
-newDF <- log2(geneDF)
-
-newDF[newDF == '-Inf'] <- 0
-
-heatmap(newDF)

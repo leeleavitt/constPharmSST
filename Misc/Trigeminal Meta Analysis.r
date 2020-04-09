@@ -13,7 +13,7 @@ ts_info <- read.xlsx("./FX SS library data 190402 (u0591788@utah.edu) (1).xlsx",
 ts_info$Cell.name <- paste0("X.", ts_info$Cell.name)
 
 # What we are interested in is Sam Espinos data
-exp_rows <- grep("^Trigeminal.*", ts_info$Experiment,T)
+exp_rows <- grep("^Trigeminal.*", ts_info$label_experiment,T)
 exp_info <- ts_info[exp_rows,]
 
 # we also need to ensure the experiment has an rd.name
@@ -44,7 +44,7 @@ rd_paths <- lapply(rd_to_load, function(x) grep(x, list.files(all.files = T, rec
 for( i in rd_paths){load(i)}
 
 #lets reduce the ts_info to only what is needed
-exp_info_to_add <- exp_info[c("Gnomex.Label", "Cell.name", "M.Assigned" , "rd.name", "Cell.type", "Experiment", "cDNA.conc.ug.mL")]
+exp_info_to_add <- exp_info[c("Gnomex.Label", "Cell.name", "M.Assigned" , "rd.name", "label_cellType", "label_experiment", "cDNA.conc.ug.mL")]
 
 #now we need to add transcriptome data to the c.dat for only the specified cells
 exps <- as.character( unique(exp_info$rd.name) )

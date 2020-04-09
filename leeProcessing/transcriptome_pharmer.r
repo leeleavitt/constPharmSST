@@ -34,7 +34,7 @@ LinesEvery_ts <- function(exps = exps, exp_info = exp_info, reduce=F, levs=NULL,
 
     for( i in 1:length(exps)){
         exp_i_info <- exp_info[ exp_info$rd.name == exps[i], ]
-        exp_i_info <- exp_i_info[order(exp_i_info$Cell.type),]
+        exp_i_info <- exp_i_info[order(exp_i_info$label_cellType),]
         exp_cells <- exp_i_info$Cell.name
         tmp_rd <- get(exps[i])
         LinesEvery.6(tmp_rd, exp_cells, values = cell_info, t.type="blc", dat.n=exps[i], plot.new=F, lw=2, underline=F, levs=levs, img=imgs, gnomex_lab = tmp_rd$c.dat[,'Gnomex.Label',drop=F])
@@ -261,7 +261,7 @@ ts_info_cleaner <- function(ts_info){
     tsInfoClean <- ts_RunOnly[rdLogic, ]
 
     #remove any DTAM experiments
-    tsInfoClean <- tsInfoClean[tsInfoClean$Experiment != 'DTAM',]
+    tsInfoClean <- tsInfoClean[tsInfoClean$label_experiment != 'DTAM',]
 
     # Give it some row.names
     row.names(tsInfoClean) <- tsInfoClean$Gnomex.Label
@@ -271,16 +271,16 @@ ts_info_cleaner <- function(ts_info){
 
 
 #' Function to return Gnomex.labels based on Selections from
-#' first the Experiment Collumn and then the Cell type Collumn
+#' first the label_experiment Collumn and then the Cell type Collumn
 #' @param expSel will allow you to select cells by experiment
 #' @param ctSel will allow you to select cells by cell_type
 dataSelector <- function(expSel = T, ctSel = T, cellsSelection = NULL){
     cat('Function to Return Gnomex Labels Based on\n1.the experiment type you select\n2.the cell_type you select\nSelecting Cancel will return all values.\n')
-    # How I want to First Select Data is based on Experiment
-    experimentTypes <- as.character(unique(tsSuper$ts_info$Experiment))
+    # How I want to First Select Data is based on label_experiment
+    experimentTypes <- as.character(unique(tsSuper$ts_info$label_experiment))
     if(expSel){
-        cat('\nSelect the Experiment Types to view your data\n')
-        expsToView <- select.list(experimentTypes, multiple = T, title = "Experiment Types")
+        cat('\nSelect the label_experiment Types to view your data\n')
+        expsToView <- select.list(experimentTypes, multiple = T, title = "label_experiment Types")
     }else{
         expsToView <- vector(mode="numeric", length=0)
     }
@@ -288,14 +288,14 @@ dataSelector <- function(expSel = T, ctSel = T, cellsSelection = NULL){
     if( length(expsToView) == 0 ){
         tsSuperReduce1 <- tsSuper$ts_info
     }else{
-        expsToViewLogic <- tsSuper$ts_info$Experiment %in% expsToView
+        expsToViewLogic <- tsSuper$ts_info$label_experiment %in% expsToView
         tsSuperReduce1 <- tsSuper$ts_info[expsToViewLogic,, drop=F]
     }
     
     # cat('\nBelow You can See a summary of all the Cell Types Available To you\nfrom you initial Selection\n')
-    # print(sort(table(as.character((tsSuperReduce1$Cell.type)))))
+    # print(sort(table(as.character((tsSuperReduce1$label_cellType)))))
     if(ctSel){
-        cell_types <- as.character(unique(tsSuperReduce1$Cell.type))
+        cell_types <- as.character(unique(tsSuperReduce1$label_cellType))
         cell_typesToView <- select.list(sort(cell_types), multiple = T, title = 'Cell Types', preselect=cellsSelection)
     }else{
         cell_typesToView <- vector(mode="numeric", length=0)
@@ -304,17 +304,20 @@ dataSelector <- function(expSel = T, ctSel = T, cellsSelection = NULL){
     if( length(cell_typesToView) ==0){
         tsSuperReduce2 <- tsSuperReduce1 
     }else{
-        tsSuperReduce2Logic <- tsSuperReduce1$Cell.type %in% cell_typesToView
+        tsSuperReduce2Logic <- tsSuperReduce1$label_cellType %in% cell_typesToView
         tsSuperReduce2 <- tsSuperReduce1[tsSuperReduce2Logic,,drop=F]
     }
 
     gnomexLabs <- as.character(tsSuperReduce2$Gnomex.Label)
     ts_info_reduce <- tsSuper$ts_info[gnomexLabs, , drop=F]
-    ts_info_reduce <- ts_info_reduce[with(ts_info_reduce, order(Cell.type, Experiment)),,drop=F ]
+    ts_info_reduce <- ts_info_reduce[with(ts_info_reduce, order(label_cellType, label_experiment)),,drop=F ]
+    newOrder <- as.character(ts_info_reduce$Gnomex.Label)
+    tsSuper$ts_data <<- tsSuper$ts_data[newOrder,]
+
 
     output <- list()
     output[['ts_info_reduce']] <- ts_info_reduce
-    output[['preSelect']] <- as.character(ts_info_reduce$Cell.type)
+    output[['preSelect']] <- as.character(ts_info_reduce$label_cellType)
     return(output)
 
 }

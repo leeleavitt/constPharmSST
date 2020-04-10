@@ -1,5 +1,8 @@
 # Load up other software
-source("./leeProcessing/transcriptome_pharmer.r")
+rPkgs <- list.files("./leeProcessing/R", full.names=T)
+lapply(rPkgs, function(x) source(x, verbose=F))
+#source("./leeProcessing/transcriptome_pharmer.r")
+
 #load("./leeProcessing/tsSuper.Rdata")
 
 readkeygraph <- function(prompt){
@@ -28,11 +31,15 @@ dev.new(width = 5 , height = 5)
 tsWindow <- dev.cur()
 par( mar=c(0,0,0,0),xaxt='n', yaxt='n' )
 plot(0,0, xlim = c(-10,10), ylim=c(-10,10), pch='')
-text(0,0, "Welcome\nto the\nTranscriptome Surfer", cex=2, font=2)
+text(0,0, "Welcome to the\nTranscriptome Surfer\nMake this window\nfocused when using\nkeyboard", cex=2, font=2)
 
 # Open the heatmap window
 dev.new(width = 8, height = 6)
 hmWindow <- dev.cur()
+
+# Open the boxplot window
+dev.new(width = 9, height = 5.5)
+bpWindow <- dev.cur()
 
 dev.set(tsWindow)
 
@@ -52,7 +59,7 @@ genes <- c()
 geneSubset <- c()
 
 # Now initialize our transcriptome information
-tsInfoReduce <- tsSuper$ts_info[with(tsSuper$ts_info, order(label_cellType, label_experiment)),,drop=F ]
+tsInfoReduce <- tsSuper$ts_info[order(tsSuper$ts_info$label_cellType_numeric),,drop=F ]
 tsInfoReduce$label_cellType <- factor(tsInfoReduce$label_cellType)
 
 # This is a setting which is default selected cells.
@@ -216,6 +223,36 @@ while(keyPressed != 'q'){
 
     }
 
+    #' @param 
 }
+
+
+# To click in the heatmap
+dev.set(hmWindow)
+#install.packages('gplots')
+hm <- heatmap(newDF, Rowv = NA, Colv = NA)
+
+genesToClick <- genes[genes %in% geneSubset]
+totalGenes <- length(genesToClick)
+
+xleft <- 0.058
+xright <-  0.85
+
+totalxDistance <- xright - xleft
+xCellWidth <- totalxDistance/totalGenes
+
+newTotalxDistance <- totalxDistance - xCellWidth
+
+ytop <- 1.18
+ybottom <- -0.107
+
+
+libraryLocs <- seq(ytop, ybottom, length.out = length(libraryNames))
+
+geneLocs <- seq(xleft, xright, length.out = length(genesToClick)-1 )
+
+#locator(n=1)
+par(xpd=T)
+points(expand.grid(geneLocs, libraryLocs), pch=15, col='blue', cex=.3)
 
 

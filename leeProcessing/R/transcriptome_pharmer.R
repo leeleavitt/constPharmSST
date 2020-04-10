@@ -310,7 +310,7 @@ dataSelector <- function(expSel = T, ctSel = T, cellsSelection = NULL){
 
     gnomexLabs <- as.character(tsSuperReduce2$Gnomex.Label)
     ts_info_reduce <- tsSuper$ts_info[gnomexLabs, , drop=F]
-    ts_info_reduce <- ts_info_reduce[with(ts_info_reduce, order(label_cellType, label_experiment)),,drop=F ]
+    ts_info_reduce <- ts_info_reduce[order(ts_info_reduce$label_cellType_numeric),,drop=F ]
     newOrder <- as.character(ts_info_reduce$Gnomex.Label)
     tsSuper$ts_data <<- tsSuper$ts_data[newOrder,]
 
@@ -398,12 +398,3 @@ searchSelector <- function(){
 
 # xtable(hi)
 
-
-starfunc <- function(tp){
-	sigc <- ""
-	if(tp < .1){sigc <- "-"}
-	if(tp < .05){sigc <- "*"}	
-	if(tp < .01){sigc <- "**"}
-	if(tp < .001){sigc <- "***"}
-	return(sigc)
-}

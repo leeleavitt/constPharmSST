@@ -77,26 +77,6 @@ logFlag <- FALSE
 # newOrder <- as.character(tsInfoReduce$Gnomex.Label)
 # tsSuper$ts_data <- tsSuper$ts_data[newOrder,]
 
-
-# boxplot based on selected factors
-tsBoxPlot <- function(){
-    
-}
-gene = 'Pvalb'
-
-boxLabels <- paste0(newLibraryNames, " : n=", as.character(summary(tsInfoReduce$label_cellType)) )
-
-factor(paste0(tsInfoReduce$label_experiment))
-boxplot(
-    tsSuper$ts_data[libraryNames, gene] ~ factor( tsInfoReduce$label_experiment),
-    bty = 'l',
-    xlab = '',
-    xaxs = 'n'
-    )
-
-
-
-
 length(genes)
 while(keyPressed != 'q'){
     # Update the heatmap, this also makes the matrix of 

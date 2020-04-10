@@ -397,3 +397,13 @@ searchSelector <- function(){
 # hi<- knit_print(hi)
 
 # xtable(hi)
+
+
+starfunc <- function(tp){
+	sigc <- ""
+	if(tp < .1){sigc <- "-"}
+	if(tp < .05){sigc <- "*"}	
+	if(tp < .01){sigc <- "**"}
+	if(tp < .001){sigc <- "***"}
+	return(sigc)
+}

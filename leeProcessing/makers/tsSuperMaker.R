@@ -45,13 +45,24 @@ for( i in 1:length(caExperiments)){
 }
 
 # Also Add the mouse.gene.go to the ts super
+# this is packaged inside of kevins blob
 load('./Misc/cell.type.blob.032020.Rdata')
 
+# Lets get the gene info that we need for synonyms and what not
+# actually very useful table
+gene_info <- read.delim("leeProcessing/rawData/gene_result.txt", sep = "\t")
 
 tsSuper <- list()
+# The Calcium Imaging Experiment
 tsSuper[['RD']] <- rdSuper
+# The information describing each library
 tsSuper[['ts_info']] <- ts_info
+# The transcriptome Data
 tsSuper[['ts_data']] <- ts_data
+# Gene information
+tsSuper[['gene_info']] <- gene_info
+# Gene desriptions
 tsSuper[['gene.desc']] <- mouse.gene.desc
+# Gene go terms,
 tsSuper[['gene.go']] <- mouse.gene.go
 save(tsSuper, file='./leeProcessing/tsSuper.Rdata')

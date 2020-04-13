@@ -1,9 +1,8 @@
 # Load up other software
 rPkgs <- list.files("./leeProcessing/R", full.names=T)
 lapply(rPkgs, function(x) source(x, verbose=F))
-#source("./leeProcessing/transcriptome_pharmer.r")
 
-#load("./leeProcessing/tsSuper.Rdata")
+# #load("./leeProcessing/tsSuper.Rdata")
 
 readkeygraph <- function(prompt){
     getGraphicsEvent(prompt = prompt, 
@@ -34,12 +33,16 @@ plot(0,0, xlim = c(-10,10), ylim=c(-10,10), pch='')
 text(0,0, "Welcome to the\nTranscriptome Surfer\nMake this window\nfocused when using\nkeyboard", cex=2, font=2)
 
 # Open the heatmap window
-dev.new(width = 8, height = 6)
+dev.new(width = 10, height = 8)
 hmWindow <- dev.cur()
 
 # Open the boxplot window
 dev.new(width = 9, height = 5.5)
 bpWindow <- dev.cur()
+
+# Open the peakfunc
+dev.new(width = 12, height = 4)
+pfWindow <- dev.cur()
 
 dev.set(tsWindow)
 
@@ -77,8 +80,6 @@ for(i in 1:length(cellRep)){
     newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
 }
 
-# Default value for log normalization applied to heatmap.
-logFlag <- FALSE
 
 # # 
 # newOrder <- as.character(tsInfoReduce$Gnomex.Label)
@@ -103,12 +104,7 @@ while(keyPressed != 'q'){
             geneDF <- apply(geneDF, 2, rev)
             row.names(geneDF) <- rev(newLibraryNames)
             dev.set(hmWindow)
-            if(logFlag){
-                newDF <- log(geneDF+1)
-                heatmap(newDF, Rowv = NA, Colv = NA)
-            }else{
-                heatmap(geneDF, Rowv = NA, Colv = NA)
-            }     
+            tsHeatMap(geneDF)
             dev.set(tsWindow)
             heatMapFlag <- FALSE
         }
@@ -116,6 +112,43 @@ while(keyPressed != 'q'){
     
     # After the flags have been parsed, lets move onto which key was pressed
     keyPressed <- readkeygraph("Press q to EXIT")
+
+    if(keyPressed == 'F1'){
+        dev.set(hmWindow)
+        clickLoc <- locator(n=1)
+        
+        # Find Genes
+        xLoc <- clickLoc$x
+        geneLocs <- seq(0,1,length.out = dim(geneDF)[2])
+        geneSelected <- which.min(abs(geneLocs - xLoc))
+        geneForBox <- colnames(geneDF)[geneSelected]
+        dev.set(bpWindow)
+        tryCatch(
+            tsBoxPlot(geneForBox),
+                error=function(e)NULL
+            )
+
+        # Find Cell selected
+        yLoc <- clickLoc$y
+        cellLocs <- seq(0,1,length.out = dim(geneDF)[1])
+        cellSelected <- which.min(abs(cellLocs - yLoc))
+        cellForPeakunc <- libraryNames[cellSelected]
+        
+        rdName <- as.character(tsSuper$ts_info[cellForPeakunc,'rd.name'])
+
+        cellName <- as.character(tsSuper$ts_info[cellForPeakunc,'Cell.name'])
+
+        if(!nchar(cellName) > 4){
+            dev.set(pfWindow)
+            tryCatch(
+                PeakFunc7(tsSuper$RD[[rdName]], paste0("X.", cellName)),
+                error=function(e)NULL
+            )
+
+        }
+
+        dev.set(tsWindow)
+    }
 
     #' @param d Select cells 
     if(keyPressed == 'd'){
@@ -210,13 +243,13 @@ while(keyPressed != 'q'){
     if(keyPressed == 'n'){
         heatMapNormOptions <-  c("row", "column", "none", "log")
         cat('\nHow would you like to scale the heatmap?\n')
-        
         newOptions <- select.list(heatMapNormOptions, multiple=T, "Normalization")
+        formals(tsHeatMap)$scale <- newOptions
+
         if('log' %in% newOptions){
-            logFlag <- TRUE
-            formals(heatmap)$scale <- newOptions
+            formals(tsBoxPlot)$log <- TRUE
         }else{
-            logFlag <- FALSE
+            formals(tsBoxPlot)$log <- FALSE
         }
         
         heatMapFlag <- TRUE 
@@ -226,33 +259,5 @@ while(keyPressed != 'q'){
     #' @param 
 }
 
-
-# To click in the heatmap
-dev.set(hmWindow)
-#install.packages('gplots')
-hm <- heatmap(newDF, Rowv = NA, Colv = NA)
-
-genesToClick <- genes[genes %in% geneSubset]
-totalGenes <- length(genesToClick)
-
-xleft <- 0.058
-xright <-  0.85
-
-totalxDistance <- xright - xleft
-xCellWidth <- totalxDistance/totalGenes
-
-newTotalxDistance <- totalxDistance - xCellWidth
-
-ytop <- 1.18
-ybottom <- -0.107
-
-
-libraryLocs <- seq(ytop, ybottom, length.out = length(libraryNames))
-
-geneLocs <- seq(xleft, xright, length.out = length(genesToClick)-1 )
-
-#locator(n=1)
-par(xpd=T)
-points(expand.grid(geneLocs, libraryLocs), pch=15, col='blue', cex=.3)
 
 

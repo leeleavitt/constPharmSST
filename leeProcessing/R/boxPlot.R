@@ -8,9 +8,11 @@ starfunc <- function(tp){
 	return(sigc)
 }
 
-# boxplot based on selected factors
-gene = 'Kcnc1'
-tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE){
+#' boxplot based on selected factors
+#' @param gene the gene to view these cells
+#' @param log boolean, log scale the axis
+#' @param labels, this defines how the cells are grouped in each boxplot
+tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE, labels = NULL){
     # Create the subset of data to work with,
     tsData <- tsSuper$ts_data[libraryNames, gene]
     if(log){
@@ -21,18 +23,14 @@ tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE){
     }
 
     # Label Grouping, can be multiple
-    labelTypes <- grep("^label", names(tsInfoReduce), value=T)
-
-    labels <- select.list(labelTypes, multiple = T, 'Select label/s')
-
-    labelConcat <- as.character(tsInfoReduce[libraryNames, labels[1]])
-    if(length(labels) > 1 ){
-        for( i in 2:length(labels) ){
-            print(i)
-            labelConcat <- paste0(labelConcat, '__', as.character(tsInfoReduce[libraryNames, labels[i] ]))
-        }
+    if(is.null(labels)){
+        labelTypes <- grep("^label", names(tsInfoReduce), value=T)
+        labels <- select.list(labelTypes, multiple = T, 'Select label/s')
+        labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
+        labelConcat <- factor(labelConcat, levels= unique(labelConcat))
+    }else{
+        labelConcat <- labels
     }
-    labelConcat <- factor(labelConcat, levels= unique(labelConcat))
 
     boxLabels <- paste0(
         levels(labelConcat), 

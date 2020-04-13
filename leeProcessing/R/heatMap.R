@@ -1,9 +1,22 @@
 # To click in the heatmap
-heatMapBasic <- function(geneDF){
+tsHeatMap <- function(geneDF, scale = c('none')){
+    # Log transfrom if asked.
+
+    # Scale the dataframe the way you define    
+    if('log' %in% scale){
+        geneDF <- log(geneDF + 1)
+    }else if('row' %in% scale){
+        geneDF <- scale(geneDF)
+    }else if ('column' %in% scale) {
+       geneDF <- scale(t(geneDF))
+       geneDF <- t(geneDF)
+    }
+
     geneDF <- t(geneDF)
     par(mar=c(5,12,2,2)+0.1)
     image(geneDF, xaxt='n', yaxt='n', bty='n')
 
+    par(xpd=T)
     # add the gene label / x labels
     geneNames <- row.names(geneDF)
     yloc <- rep(par('usr')[1] - yinch(.1), length(geneNames))

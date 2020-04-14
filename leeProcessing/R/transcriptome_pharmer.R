@@ -311,8 +311,8 @@ dataSelector <- function(expSel = T, ctSel = T, cellsSelection = NULL){
     gnomexLabs <- as.character(tsSuperReduce2$Gnomex.Label)
     ts_info_reduce <- tsSuper$ts_info[gnomexLabs, , drop=F]
     ts_info_reduce <- ts_info_reduce[order(ts_info_reduce$label_cellType_numeric),,drop=F ]
-    newOrder <- as.character(ts_info_reduce$Gnomex.Label)
-    tsSuper$ts_data <<- tsSuper$ts_data[newOrder,]
+    # newOrder <- as.character(ts_info_reduce$Gnomex.Label)
+    # tsSuper$ts_data <<- tsSuper$ts_data[newOrder,]
 
 
     output <- list()
@@ -397,7 +397,7 @@ searchSelector <- function(){
 #added dat.n for insertation of the name for the rd file
 PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, info=T,lmain=NULL, bcex=.7, yvar=T, ylim.max=NULL, zf=40, pts=T, lns=T, levs=NULL, underline=T, dat.n=""){
     dat.name<-deparse(substitute(dat))
-    if(dat.name=="dat"){dat.name<-dat.n
+    if(! dat.name == ""){dat.name<-dat.n
     }else{dat.name<-dat.name}	
     
     if(is.null(lmain)){

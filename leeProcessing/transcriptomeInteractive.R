@@ -2,7 +2,7 @@
 rPkgs <- list.files("./leeProcessing/R", full.names=T)
 lapply(rPkgs, function(x) source(x, verbose=F))
 
-# #load("./leeProcessing/tsSuper.Rdata")
+#load("./leeProcessing/tsSuper.Rdata")
 
 readkeygraph <- function(prompt){
     getGraphicsEvent(prompt = prompt, 
@@ -71,14 +71,15 @@ cellsSelection <- as.character(tsSuper$ts_info$label_cellType)
 libraryNames <- row.names(tsInfoReduce)
 
 # Options for how to represent the cells
-cellRepOptions <- c("Gnomex.Label", "label_experiment", "label_cellType", "rd.name", 'Cell.name')
+cellRepOptions <- c("Gnomex.Label", "rd.name", 'Cell.name')
+labelReps <- grep("^label_", colnames(tsInfoReduce), value=T)
+cellRepOptions <- c(cellRepOptions, labelReps)
 # Default represenation of the cells.
 cellRep <- c('Gnomex.Label', 'label_cellType', 'label_experiment')
 # Make the new cell representaion
 newLibraryNames <- c()
-for(i in 1:length(cellRep)){
-    newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
-}
+
+newLibraryNames <- apply(tsInfoReduce[, cellRep ], 1, paste0, collapse="__")
 
 
 # # 
@@ -90,16 +91,14 @@ while(keyPressed != 'q'){
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(renameFlag){
-        newLibraryNames <- c()
-        for(i in 1:length(cellRep)){
-            newLibraryNames <- paste0(newLibraryNames,tsInfoReduce[, cellRep[i] ], '__')
-        }
+        newLibraryNames <- apply(tsInfoReduce[libraryNames, cellRep],1, paste0, collapse='__')    
     }
 
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(heatMapFlag){
         if(length(genes) > 0 & length(libraryNames) > 0){
+            dim(tsSuper$ts_data)
             geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
             geneDF <- apply(geneDF, 2, rev)
             row.names(geneDF) <- rev(newLibraryNames)
@@ -122,15 +121,16 @@ while(keyPressed != 'q'){
         geneLocs <- seq(0,1,length.out = dim(geneDF)[2])
         geneSelected <- which.min(abs(geneLocs - xLoc))
         geneForBox <- colnames(geneDF)[geneSelected]
+        formals(tsBoxPlot)$gene <- geneForBox
         dev.set(bpWindow)
         tryCatch(
-            tsBoxPlot(geneForBox),
+            tsBoxPlot(),
                 error=function(e)NULL
             )
 
         # Find Cell selected
         yLoc <- clickLoc$y
-        cellLocs <- seq(0,1,length.out = dim(geneDF)[1])
+        cellLocs <- seq(1,0,length.out = dim(geneDF)[1])
         cellSelected <- which.min(abs(cellLocs - yLoc))
         cellForPeakunc <- libraryNames[cellSelected]
         
@@ -138,10 +138,10 @@ while(keyPressed != 'q'){
 
         cellName <- as.character(tsSuper$ts_info[cellForPeakunc,'Cell.name'])
 
-        if(!nchar(cellName) > 4){
+        if(!nchar(cellName) > 5){
             dev.set(pfWindow)
             tryCatch(
-                PeakFunc7(tsSuper$RD[[rdName]], paste0("X.", cellName)),
+                PeakFunc7(tsSuper$RD[[rdName]], paste0("X.", cellName), dat.n = names(tsSuper$RD[rdName])),
                 error=function(e)NULL
             )
 
@@ -159,6 +159,8 @@ while(keyPressed != 'q'){
         tsInfoReduce <- dataSelectorReturn[[1]]
         cellsSelection <- dataSelectorReturn[[2]]
         libraryNames <- row.names(tsInfoReduce)
+        
+        formals(tsHeatMap)$labels <- NULL
 
         if(length(genes) > 0){
             heatMapFlag <- TRUE
@@ -256,7 +258,33 @@ while(keyPressed != 'q'){
 
     }
 
-    #' @param 
+    #' @param  labels to observe groupings for the cells
+    if(keyPressed == 'l'){
+        # decide what labels to work with
+        labelTypes <- grep("^label", names(tsInfoReduce), value=T)
+        # select the label/labels
+        labels <- select.list(labelTypes, multiple = T, 'Select label/s')
+        if( length(labels) > 0){
+            # combine these labels
+            labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
+            # convert to factor, with level specified.
+            labelConcat <- factor(labelConcat, levels= unique(labelConcat))
+            
+            libraryNames <- names(sort(labelConcat))
+            formals(tsHeatMap)$labels <- labelConcat
+            formals(tsBoxPlot)$labels <- labelConcat
+            
+            dev.set(bpWindow)
+            tsBoxPlot()
+            dev.set(tsWindow)
+            heatMapFlag <- T
+            renameFlag <- T
+        }else{
+            formals(tsHeatMap)[['labels']] <- NA
+            print(formals(tsHeatMap))
+            heatMapFlag <- T
+        }
+    }
 }
 
 

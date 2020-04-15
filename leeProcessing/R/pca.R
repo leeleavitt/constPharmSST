@@ -43,9 +43,21 @@ singularVectorPicker <- function(geneDF, totalSV = 10){
     dev.off(svPicker)
     return(svSel)
 }
-singularVectorPicker(geneDF,30)
 
-tsSVDBiPlot <- function(geneDF, SV = NA, labels){
+#' Function to plot the BiPlot
+#' @param geneDF is the matrix of cells vs genes
+#' @param SV is the singular vectors to use
+#' @param labels is how you want the labels to be displayed color wise
+tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
+    geneDF[is.na(geneDF)]<-0
+    if( nlevels(labels) > 2 | !is.na(labels) ){
+        newPallete <- RColorBrewer::brewer.pal(n=nlevels(labels), 'Dark2')
+        palette(newPallete)
+        color <- rev(as.integer(labels))
+    }else{
+        color <- 'black'
+    }
+
     if( is.na(SV) ){
         SV <- c(1,2)
     }
@@ -58,6 +70,7 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels){
 
     # Plot the principal directions first
     colorC <- hcl(0,0,0,0.5)
+    par(mar=c(5,5,5,5), bty='o')
     plot(
         pd1, 
         pd2, 
@@ -74,11 +87,11 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels){
     }
     text(pd1, pd2, colnames(geneDF), cex = .6, col = colorC, font=2)
     axis(3)
-    mtext(paste0('PD', SV[1]), 3)
+    mtext(paste0('PD', SV[1]), 3, line=3)
     axis(4)
-    mtext(paste0('PD', SV[2]), 4)
+    mtext(paste0('PD', SV[2]), 4, line=3)
 
-    par(new=T)
+    par(new=T, xpd=T)
 
     # Add principal component labeling
     plot(pc1, 
@@ -87,15 +100,12 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels){
         axes=F,
         xlab = '',
         ylab='')
-    text(pc1, pc2, row.names(geneDF), cex=.4, col=color)
+    text(pc1, pc2, row.names(geneDF), cex=.8, col=color)
 
     axis(1)
-    mtext(paste0('PC', SV[1]), 1)
+    mtext(paste0('PC', SV[1]), 1, line=3)
 
     axis(2)
-    mtext(paste0('PC', SV[2]), 2)
+    mtext(paste0('PC', SV[2]), 2, line=3)
 }
-
-tsSVDBiPlot(geneDF)   
-
 

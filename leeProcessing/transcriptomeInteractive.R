@@ -44,6 +44,10 @@ bpWindow <- dev.cur()
 dev.new(width = 12, height = 4)
 pfWindow <- dev.cur()
 
+# Open the biplot window
+dev.new(width=7, height=7)
+biPlotWindow <- dev.cur()
+
 dev.set(tsWindow)
 
 ############################################
@@ -55,6 +59,8 @@ keyPressed <- 'z'
 heatMapFlag <- FALSE
 # Renaming of the Cell_types
 renameFlag <- FALSE
+geneDfFlag <- FALSE
+tsSvdBiPlotFlag <- FALSE
 cellsSelection <- NULL
 
 # Make empty vectors for the genes and geneSubset
@@ -91,23 +97,44 @@ while(keyPressed != 'q'){
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(renameFlag){
-        newLibraryNames <- apply(tsInfoReduce[libraryNames, cellRep],1, paste0, collapse='__')    
+        if(length(cellRep) > 1){
+            newLibraryNames <- apply(tsInfoReduce[libraryNames, cellRep],1, paste0, collapse='__')    
+        }else{
+            newLibraryNames <- as.character(tsInfoReduce[libraryNames, cellRep])
+        }
+        geneDfFlag <- TRUE
+    }
+    
+    if(geneDfFlag){
+        if(length(genes) > 0 & length(libraryNames) > 0){
+            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
+            geneDF <- matrixWrangler(geneDF)
+            geneDF <- apply(geneDF, 2, rev)
+            row.names(geneDF) <- rev(newLibraryNames)
+        }
+        geneDfFlag <- FALSE
     }
 
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(heatMapFlag){
-        if(length(genes) > 0 & length(libraryNames) > 0){
-            dim(tsSuper$ts_data)
-            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
-            geneDF <- apply(geneDF, 2, rev)
-            row.names(geneDF) <- rev(newLibraryNames)
+        if(length(genes) > 0 & length(libraryNames) > 0){            
             dev.set(hmWindow)
-            tsHeatMap(geneDF)
+            tsHeatMap(geneDF)    
+            
             dev.set(tsWindow)
             heatMapFlag <- FALSE
         }
     }
+
+    if(tsSvdBiPlotFlag){
+        dev.set(biPlotWindow)
+        tsSVDBiPlot(geneDF)
+
+        dev.set(tsWindow)
+        tsSvdBiPlotFlag <- FALSE
+    }
+
     
     # After the flags have been parsed, lets move onto which key was pressed
     keyPressed <- readkeygraph("Press q to EXIT")
@@ -167,6 +194,7 @@ while(keyPressed != 'q'){
         if(length(genes) > 0){
             heatMapFlag <- TRUE
             renameFlag <- TRUE
+            tsSvdBiPlotFlag <- TRUE
         }else{
             cat("\nNo genes have been selected please press g first.\n")
         }
@@ -181,6 +209,7 @@ while(keyPressed != 'q'){
         cat(genes, sep=" ")
         renameFlag <- TRUE
         heatMapFlag <- TRUE
+        tsSvdBiPlotFlag <- TRUE
     }
 
     #' @param G Cleanup genes
@@ -198,6 +227,7 @@ while(keyPressed != 'q'){
         }
         renameFlag <- TRUE
         heatMapFlag <- TRUE
+        tsSvdBiPlotFlag <- TRUE
     }
 
     #' @param h make html heatmap
@@ -222,7 +252,7 @@ while(keyPressed != 'q'){
         }
         renameFlag <- TRUE
         heatMapFlag <- TRUE
-
+        tsSvdBiPlotFlag <- TRUE
     }
 
     #' @param s Save the Current geneDF as a csv to continue work outside
@@ -245,19 +275,19 @@ while(keyPressed != 'q'){
     
     #' @param normalization Save the gene list you have updated 
     if(keyPressed == 'n'){
-        heatMapNormOptions <-  c("row", "column", "none", "log")
+        matrixWranglerOptions <-  c("row", "column", "none", "log")
         cat('\nHow would you like to scale the heatmap?\n')
-        newOptions <- select.list(heatMapNormOptions, multiple=T, "Normalization")
-        formals(tsHeatMap)$scale <- newOptions
+        newOptions <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
+        formals(matrixWrangler)$scale <- newOptions
 
         if('log' %in% newOptions){
             formals(tsBoxPlot)$log <- TRUE
         }else{
             formals(tsBoxPlot)$log <- FALSE
         }
-        
         heatMapFlag <- TRUE 
-
+        tsSvdBiPlotFlag <- T
+        geneDfFlag <- TRUE
     }
 
     #' @param  labels to observe groupings for the cells
@@ -271,20 +301,23 @@ while(keyPressed != 'q'){
             labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
             # convert to factor, with level specified.
             labelConcat <- factor(labelConcat, levels= unique(labelConcat))
-            
-            libraryNames <- names(sort(labelConcat))
+            labelConcat <- sort(labelConcat)
+            libraryNames <- names(labelConcat)
             formals(tsHeatMap)$labels <- labelConcat
             formals(tsBoxPlot)$labels <- labelConcat
-            
+            formals(tsSVDBiPlot)$labels <- labelConcat
+
             dev.set(bpWindow)
             tsBoxPlot()
             dev.set(tsWindow)
             heatMapFlag <- T
+            tsSvdBiPlotFlag <- T
             renameFlag <- T
         }else{
             formals(tsHeatMap)[['labels']] <- NA
             print(formals(tsHeatMap))
             heatMapFlag <- T
+            tsSvdBiPlotFlag <- T
         }
     }
 }

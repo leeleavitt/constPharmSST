@@ -12,11 +12,11 @@ starfunc <- function(tp){
 #' @param gene the gene to view these cells
 #' @param log boolean, log scale the axis
 #' @param labels, this defines how the cells are grouped in each boxplot
-tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE, labels = NULL){
+tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
     # Create the subset of data to work with,
-    tsData <- tsSuper$ts_data[libraryNames, gene]
+    geneDF <- tsSuper$ts_data[libraryNames, gene]
     if(log){
-        tsData <- log(tsData+1)
+        #geneDF <- log(geneDF+1)
         ylab <- "log(TPM)"
     }else{
         ylab <- "TPM"
@@ -42,7 +42,7 @@ tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE, labels = NULL){
     # boxplot
     par(bty = 'l', mar = c(10, 4, 4, 1) )
     bpDims <- boxplot(
-        tsData ~ labelConcat,
+        geneDF ~ labelConcat,
         bty = 'l',
         xlab = "",
         ylab = ylab, 
@@ -65,10 +65,10 @@ tsBoxPlot <- function(gene = 'Kcnc1', log = TRUE, labels = NULL){
     x.jit <- jitter(as.integer(labelConcat))
     pointLabels <- as.character(tsInfoReduce[libraryNames, 'label_subClass'])
     pointLabels[is.na(pointLabels)] <- 'x'
-    text(x.jit, tsData, pointLabels, cex=.8, font=2)
+    text(x.jit, geneDF, pointLabels, cex=.8, font=2)
 
     # perform kevins regression analysis
-    glt <- glm(tsData ~ labelConcat ) 
+    glt <- glm(geneDF ~ labelConcat ) 
     strs <- lapply(coefficients(summary(glt))[,4],starfunc) #
     text(
         1:(length(strs)), 

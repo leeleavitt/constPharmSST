@@ -1,7 +1,5 @@
 # To click in the heatmap
-tsHeatMap <- function(geneDF, scale = c('none'), labels = NA){
-    # Log transfrom if asked.
-
+tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA, cellSelected = NA){
     # Scale the dataframe the way you define    
     if('log' %in% scale){
         geneDF <- log(geneDF + 1)
@@ -34,19 +32,12 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA){
         newPallete <- RColorBrewer::brewer.pal(n=nlevels(labels), 'Dark2')
         palette(newPallete)
         color <- rev(as.integer(labels))
-    }else{
-        color <- 'black'
-        print(color)
-    }
 
-    text(xloc, yloc, cellNames, adj=1, cex = cells_cex[length(cellNames)], col = color , font=2)
-
-    # Add horizontal line per labelspec
-    if(!is.null(labels) & length(labels) > 1){
         totalYDistance <- (abs(par('usr')[3]) + abs(par('usr')[4]))
         cell <- totalYDistance/length(labels)
         halfCell <- cell / 2
         
+        # Add horizontal line per labelspec
         runningCellTotal <- 0
         par(xpd=F)
         for( i in length(levels(labels)):2){
@@ -54,6 +45,42 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA){
             lineLocation <- (runningCellTotal * cell) - halfCell
             abline(h = lineLocation, lwd=1)
         }
+        par(xpd=T)
+    }else{
+        color <- 'black'
+        print(color)
+    }
+
+    text(xloc, yloc, cellNames, adj=1, cex = cells_cex[length(cellNames)], col = color , font=2)
+
+    # add rectangular box surrouynding the selected geneName
+    if( !is.na(geneSelected) ){
+        totalXDistance <- (abs(par('usr')[1]) + abs(par('usr')[2]))
+        columnWidth <- totalXDistance / length(geneNames)
+        columnWidthHalf <- columnWidth / 2
+
+        # Define top of retangle
+        yBottom <- par('usr')[3]
+        yTop <- par('usr')[4]
+        columnMiddle <- columnWidth * (geneSelected-1)
+        xLeft <- columnMiddle - columnWidthHalf
+        xRight <- columnMiddle + columnWidthHalf
+        rect(xLeft, yBottom, xRight, yTop, lwd=3)
+    }
+
+    # add rectangular box surrouynding the selected cellName
+    if( !is.na(cellSelected) ){
+        totalYDistance <- (abs(par('usr')[3]) + abs(par('usr')[4]))
+        rowWidth <- totalYDistance / length(cellNames)
+        rowWidthHalf <- rowWidth / 2
+
+        # Define top of retangle
+        rowMiddle <- rowWidth * (length(cellNames) - cellSelected)
+        yBottom <- rowMiddle - rowWidthHalf
+        yTop <- rowMiddle + rowWidthHalf
+        xLeft <- par('usr')[1]
+        xRight <- par('usr')[2]
+        rect(xLeft, yBottom, xRight, yTop, lwd=3)
     }
 }
 

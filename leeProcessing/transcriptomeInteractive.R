@@ -135,7 +135,6 @@ while(keyPressed != 'q'){
         cellForPeakunc <- libraryNames[cellSelected]
         
         rdName <- as.character(tsSuper$ts_info[cellForPeakunc,'rd.name'])
-
         cellName <- as.character(tsSuper$ts_info[cellForPeakunc,'Cell.name'])
 
         if(!nchar(cellName) > 5){
@@ -144,9 +143,12 @@ while(keyPressed != 'q'){
                 PeakFunc7(tsSuper$RD[[rdName]], paste0("X.", cellName), dat.n = names(tsSuper$RD[rdName])),
                 error=function(e)NULL
             )
-
         }
-
+        
+        # Replo the heatmap with where you clicked
+        dev.set(hmWindow)
+        tsHeatMap(geneDF, geneSelected = geneSelected, cellSelected = cellSelected)
+        
         dev.set(tsWindow)
     }
 
@@ -160,7 +162,7 @@ while(keyPressed != 'q'){
         cellsSelection <- dataSelectorReturn[[2]]
         libraryNames <- row.names(tsInfoReduce)
         
-        formals(tsHeatMap)$labels <- NULL
+        formals(tsHeatMap)$labels <- NA
 
         if(length(genes) > 0){
             heatMapFlag <- TRUE

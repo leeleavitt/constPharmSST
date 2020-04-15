@@ -680,7 +680,19 @@ PeakFunc7 <- function(dat,n.names,t.type="t.dat",Plotit.trace=T,Plotit.both=F, i
     
 }	
 
-
+matrixWrangler <- function(geneDF, scale = c('none')){
+    # Scale the dataframe the way you define    
+    if('log' %in% scale){
+        geneDF <- log(geneDF + 1)
+    }else if('row' %in% scale){
+        geneDF <- scale(geneDF)
+    }else if ('column' %in% scale) {
+       geneDF <- scale(t(geneDF))
+       geneDF <- t(geneDF)
+    }
+    
+    return(geneDF)
+}
 # hi<- heatMapper(geneDF)
 
 # hi<- knit_print(hi)

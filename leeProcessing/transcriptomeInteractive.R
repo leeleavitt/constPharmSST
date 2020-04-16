@@ -72,117 +72,117 @@ dev.set(tsWindow)
 
 ############################################
 # Initialize default values.
-tsInfoReduce <- tsSuper$ts_info
 
 keyPressed <- 'z'
-# Whether the heatmap should be plotted
-heatMapFlag <- FALSE
-# Renaming of the Cell_types
-renameFlag <- FALSE
-geneDfFlag <- FALSE
-tsSvdBiPlotFlag <- FALSE
-boxPlotFlag <- FALSE
-labelFlag <- FALSE
-cellsSelection <- NULL
 
 # Make empty vectors for the genes and geneSubset
-genes <- c()
-geneSubset <- c()
+if(is.null(SETTINGS)){
+    SETTINGS <- list()
+    SETTINGS[[ 'genes' ]] <- c()
+    SETTINGS[[ 'geneSubset' ]] <- c()
 
-# Now initialize our transcriptome information
-tsInfoReduce <- tsSuper$ts_info[order(tsSuper$ts_info$label_cellType_numeric),,drop=F ]
-tsInfoReduce$label_cellType <- factor(tsInfoReduce$label_cellType)
+    # Now initialize our transcriptome information
+    SETTINGS[[ 'tsInfoReduce' ]] <- tsSuper$ts_info[order(tsSuper$ts_info$label_cellType_numeric),,drop=F ]
+    SETTINGS[[ 'tsInfoReduce' ]]$label_cellType <- factor(SETTINGS[[ 'tsInfoReduce' ]]$label_cellType)
 
-# This is a setting which is default selected cells.
-cellsSelection <- as.character(tsSuper$ts_info$label_cellType)
-# This is the name of the librarys, this is consistent across ts_info and ts_data
-libraryNames <- row.names(tsInfoReduce)
+    # This is a setting which is default selected cells.
+    SETTINGS[[ 'cellsSelection' ]] <- as.character(tsSuper$ts_info$label_cellType)
+    # This is the name of the librarys, this is consistent across ts_info and ts_data
+    SETTINGS[[ 'libraryNames' ]] <- row.names(SETTINGS[[ 'tsInfoReduce' ]])
 
-# Options for how to represent the cells
-cellRepOptions <- c("Gnomex.Label", "rd.name", 'Cell.name')
-labelReps <- grep("^label_", colnames(tsInfoReduce), value=T)
-cellRepOptions <- c(cellRepOptions, labelReps)
-# Default represenation of the cells.
-cellRep <- c('Gnomex.Label', 'label_cellType', 'label_experiment')
-# Make the new cell representaion
-newLibraryNames <- c()
-newLibraryNames <- apply(tsInfoReduce[, cellRep ], 1, paste0, collapse="__")
+    # Options for how to represent the cells
+    SETTINGS[[ 'cellRepOptions' ]] <- c("Gnomex.Label", "rd.name", 'Cell.name')
+    SETTINGS[[ 'labelReps' ]] <- grep("^label_", colnames(SETTINGS[[ 'tsInfoReduce' ]]), value=T)
+    SETTINGS[[ 'cellRepOptions' ]] <- c(SETTINGS[[ 'cellRepOptions' ]], SETTINGS[[ 'labelReps' ]])
+    # Default represenation of the cells.
+    SETTINGS[[ 'cellRep' ]] <- c('Gnomex.Label', 'label_cellType', 'label_experiment')
+    # Make the new cell representaion
+    SETTINGS[[ 'newLibraryNames' ]] <- c()
+    SETTINGS[[ 'newLibraryNames' ]] <- apply(SETTINGS[[ 'tsInfoReduce' ]][, SETTINGS[[ 'cellRep' ]] ], 1, paste0, collapse="__")
+    
+    #Define the label's and the label for comparison
+    SETTINGS[[ 'labelConcat' ]] <- NA
+    SETTINGs[[ 'labelForComparison' ]] <- NA
+    
+    # Define the default flag values
+    SETTINGS[[ 'heatMapFlag' ]] <- FALSE
+    SETTINGS[[ 'renameFlag' ]] <- FALSE
+    SETTINGS[[ 'geneDfFlag' ]] <- FALSE
+    SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- FALSE
+    SETTINGS[[ 'boxPlotFlag' ]] <- FALSE
+    SETTINGS[[ 'labelFlag' ]] <- FALSE
+}
 
-
-# # 
-# newOrder <- as.character(tsInfoReduce$Gnomex.Label)
-# tsSuper$ts_data <- tsSuper$ts_data[newOrder,]
-
-length(genes)
+length(SETTINGS[[ 'genes' ]])
 while(keyPressed != 'q'){
     # This makes the new labels and updates the functions with the new labels
-    if(labelFlag){
+    if(SETTINGS[[ 'labelFlag' ]]){
         # combine these labels
-        labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
+        SETTINGS[[ 'labelConcat' ]] <- apply(SETTINGS[[ 'tsInfoReduce' ]][SETTINGS[[ 'libraryNames' ]], labels, drop=F], 1,paste0,collapse ='__')
         # convert to factor, with level specified.
-        labelConcat <- factor(labelConcat, levels= unique(labelConcat))
-        labelConcat <- sort(labelConcat)
-        libraryNames <- names(labelConcat)
-        formals(tsHeatMap)$labels <- labelConcat
-        formals(tsBoxPlot)$labels <- labelConcat
-        formals(tsSVDBiPlot)$labels <- labelConcat
+        SETTINGS[[ 'labelConcat' ]] <- factor(SETTINGS[[ 'labelConcat' ]], levels= unique(SETTINGS[[ 'labelConcat' ]]))
+        SETTINGS[[ 'labelConcat' ]] <- sort(SETTINGS[[ 'labelConcat' ]])
+        SETTINGS[[ 'libraryNames' ]] <- names(SETTINGS[[ 'labelConcat' ]])
+        formals(tsHeatMap)$labels <- SETTINGS[[ 'labelConcat' ]]
+        formals(tsBoxPlot)$labels <- SETTINGS[[ 'labelConcat' ]]
+        formals(tsSVDBiPlot)$labels <- SETTINGS[[ 'labelConcat' ]]
 
-        boxplotFlag <- T
-        heatMapFlag <- T
-        tsSvdBiPlotFlag <- T
-        renameFlag <- T
-        labelFlag <- F
+        boxplotFlag <- TRUE
+        SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
+        SETTINGS[[ 'renameFlag' ]] <- TRUE
+        SETTINGS[[ 'labelFlag' ]] <- FALSE
     }
     
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
-    if(renameFlag){
-        if(length(cellRep) > 1){
-            newLibraryNames <- apply(tsInfoReduce[libraryNames, cellRep],1, paste0, collapse='__')    
+    if(SETTINGS[[ 'renameFlag' ]]){
+        if(length(SETTINGS[[ 'cellRep' ]]) > 1){
+            SETTINGS[[ 'newLibraryNames' ]] <- apply(SETTINGS[[ 'tsInfoReduce' ]][SETTINGS[[ 'libraryNames' ]], SETTINGS[[ 'cellRep' ]]],1, paste0, collapse='__')    
         }else{
-            newLibraryNames <- as.character(tsInfoReduce[libraryNames, cellRep])
+            SETTINGS[[ 'newLibraryNames' ]] <- as.character(SETTINGS[[ 'tsInfoReduce' ]][SETTINGS[[ 'libraryNames' ]], cellRep])
         }
-        geneDfFlag <- TRUE
+        SETTINGS[[ 'geneDfFlag' ]] <- TRUE
     }
     
     # This creates the new gene data frame
-    if(geneDfFlag){
-        if(length(genes) > 0 & length(libraryNames) > 0){
-            geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
+    if(SETTINGS[[ 'geneDfFlag' ]]){
+        if(length(SETTINGS[[ 'genes' ]]) > 0 & length(SETTINGS[[ 'libraryNames' ]]) > 0){
+            geneDF <- tsSuper$ts_data[SETTINGS[[ 'libraryNames' ]], SETTINGS[[ 'genes' ]][ SETTINGS[[ 'genes' ]] %in% SETTINGS[[ 'geneSubset' ]] ],drop=F]
             geneDF <- matrixWrangler(geneDF)
-            row.names(geneDF) <- newLibraryNames
+            row.names(geneDF) <- SETTINGS[[ 'newLibraryNames' ]]
             #geneDF <- apply(geneDF, 2, rev)
             formals(tsBoxPlot)$geneDF <- geneDF
         }
-        geneDfFlag <- FALSE
+        SETTINGS[[ 'geneDfFlag' ]] <- FALSE
     }
 
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
-    if(heatMapFlag){
-        if(length(genes) > 0 & length(libraryNames) > 0){            
+    if(SETTINGS[[ 'heatMapFlag' ]]){
+        if(length(SETTINGS[[ 'genes' ]]) > 0 & length(SETTINGS[[ 'libraryNames' ]]) > 0){            
             dev.set(hmWindow)
             tsHeatMap(geneDF)    
             dev.set(tsWindow)
-            heatMapFlag <- FALSE
+            SETTINGS[[ 'heatMapFlag' ]] <- FALSE
         }
     }
 
     # This updates the biplot
-    if(tsSvdBiPlotFlag){
+    if(SETTINGS[[ 'tsSvdBiPlotFlag' ]]){
         dev.set(biPlotWindow)
         tsSVDBiPlot(geneDF)
 
         dev.set(tsWindow)
-        tsSvdBiPlotFlag <- FALSE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- FALSE
     }
 
     # This plots the boxplot
-    if(boxPlotFlag){
+    if(SETTINGS[[ 'boxPlotFlag' ]]){
         dev.set(bpWindow)
         tsBoxPlot(geneDF)
         dev.set(tsWindow)
-        boxPlotFlag <- FALSE
+        SETTINGS[[ 'boxPlotFlag' ]] <- FALSE
     }
     
     ## After the flags have been parsed, lets move onto which key was pressed
@@ -209,7 +209,7 @@ while(keyPressed != 'q'){
         yLoc <- clickLoc$y
         cellLocs <- seq(1,0,length.out = dim(geneDF)[1])
         cellSelected <- which.min(abs(cellLocs - yLoc))
-        cellForPeakunc <- libraryNames[cellSelected]
+        cellForPeakunc <- SETTINGS[[ 'libraryNames' ]][cellSelected]
         
         rdName <- as.character(tsSuper$ts_info[cellForPeakunc,'rd.name'])
         cellName <- as.character(tsSuper$ts_info[cellForPeakunc,'Cell.name'])
@@ -236,20 +236,20 @@ while(keyPressed != 'q'){
     if(keyPressed == 'd'){
         # Function to return ts_info_Reduced
         # Also returns selected cell_types
-        dataSelectorReturn <- dataSelector(cellsSelection = cellsSelection)
+        dataSelectorReturn <- dataSelector(cellsSelection = SETTINGS[[ 'cellsSelection' ]])
         # Unpack the return
-        tsInfoReduce <- dataSelectorReturn[[1]]
-        cellsSelection <- dataSelectorReturn[[2]]
-        libraryNames <- row.names(tsInfoReduce)
+        SETTINGS[[ 'tsInfoReduce' ]] <- dataSelectorReturn[[1]]
+        SETTINGS[[ 'cellsSelection' ]] <- dataSelectorReturn[[2]]
+        SETTINGS[[ 'libraryNames' ]] <- row.names(SETTINGS[[ 'tsInfoReduce' ]])
         
         #formals(tsHeatMap)$labels <- NA
 
-        if(length(genes) > 0){
-            geneDfFlag <- TRUE
-            heatMapFlag <- TRUE
-            renameFlag <- TRUE
-            labelFlag <- TRUE
-            tsSvdBiPlotFlag <- TRUE
+        if(length(SETTINGS[[ 'genes' ]]) > 0){
+            SETTINGS[[ 'geneDfFlag' ]] <- TRUE
+            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+            SETTINGS[[ 'renameFlag' ]] <- TRUE
+            SETTINGS[[ 'labelFlag' ]] <- TRUE
+            SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
         }else{
             cat("\nNo genes have been selected please press g first.\n")
         }
@@ -257,81 +257,77 @@ while(keyPressed != 'q'){
     
     #' @param f random forest 
     if(keyPressed == 'f'){
-        # Do a quick random forest
-        if( exists('labelConcat') ){
-            if(nlevels(labelConcat) > 1 ){
-                # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
-                cat("\n1 vs All? [yes or no]\n")
-                compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
-                # If you answer yes, now select the label for this
-                if(compQuestion == 'yes' | length(compQuestion) > 0){
-                    labelForComparison <- select.list(levels(labelConcat), multiple=T, title = "Select you label")
-                    # This creates a factor for 1 vs all
-                    rfLabel <- labelConcat == labelForComparison
-                    formals(tsBoxPlot)$labelForComparison <- labelForComparison
-                }else{
-                    rfLabel <- labelConcat
-                }
-                # Walk through the forest
-                rft <- randomForest::randomForest(geneDF, rfLabel)
-                # Rank them my importance
-                imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
-                # Make genes this newly ranked order
-                genes <- names(imp)
-                
-                # This is a place where i have 
-                if(length(imp) > 200){
-                    cat("How Many genes should I return?\n")
-                    toReturn <- scan(what = 'integer', n=1)
-                    importantGenes <- imp[1:toReturn]
-                }else{
-                    importantGenes <- imp
-                }
-                geneSubset <- names(importantGenes)
-                heatMapFlag <- TRUE
-                geneDfFlag <- TRUE
-                tsSvdBiPlotFlag <- TRUE
+        # Do a quick and easy random forest
+        if(nlevels(SETTINGS[[ 'labelConcat' ]]) > 1 ){
+            # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
+            cat("\n1 vs All? [yes or no]\n")
+            compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
+            # If you answer yes, now select the label for this
+            if(compQuestion == 'yes' | length(compQuestion) > 0){
+                SETTINGS[[ 'labelForComparison' ]] <- select.list(levels(SETTINGS[[ 'labelConcat' ]]), preSelect = SETTINGS[[ 'labelForComparison' ]], title = "Select you label")
+                # This creates a factor for 1 vs all
+                rfLabel <- SETTINGS[[ 'labelConcat' ]] == SETTINGS[[ 'labelForComparison' ]]
+                formals(tsBoxPlot)$labelForComparison <- SETTINGS[[ 'labelForComparison' ]]
             }else{
-                cat("\nThere are not enough labels to define you cells\n")
+                rfLabel <- SETTINGS[[ 'labelConcat' ]]
             }
+            # Walk through the forest
+            rft <- randomForest::randomForest(geneDF, rfLabel)
+            # Rank them my importance
+            imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
+            # Make genes this newly ranked order
+            SETTINGS[[ 'genes' ]] <- names(imp)
+            
+            # This is a place where i have 
+            if(length(imp) > 200){
+                cat("How Many genes should I return?\n")
+                toReturn <- scan(what = 'integer', n=1)
+                importantGenes <- imp[1:toReturn]
+            }else{
+                importantGenes <- imp
+            }
+            SETTINGS[[ 'geneSubset' ]] <- names(importantGenes)
+            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+            SETTINGS[[ 'geneDfFlag' ]] <- TRUE
+            SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
         }else{
-            cat("\nYou have defined labels yet\n")
+            cat("\nThere are not enough labels to define you cells\nOR\nYou haven't defined labels yet\n")
         }
     }
 
     #' @param g Select genes
     if(keyPressed == 'g'){
         toSearch <- searchSelector()
-        genes <- geneFinder(toSearch)
-        geneSubset <- genes
+        SETTINGS[[ 'genes' ]] <- geneFinder(toSearch)
+        SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
         cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
-        if(length(genes) < 200){
-            cat(genes, sep=" ")
+        if(length(SETTINGS[[ 'genes' ]]) < 200){
+            cat(SETTINGS[[ 'genes' ]], sep=" ")
         }else{
-            cat(sample(genes)[1:200], sep=" ")
+            cat(sample(SETTINGS[[ 'genes' ]])[1:200], sep=" ")
             cat('\n')
         }
-        renameFlag <- TRUE
-        heatMapFlag <- TRUE
-        tsSvdBiPlotFlag <- TRUE
+        SETTINGS[[ 'renameFlag' ]] <- TRUE
+        SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
     }
 
     #' @param G Cleanup genes
     if(keyPressed == 'G'){
         cat('\nSelect a subset of genes from this list of genes\nRemeber you can press cancel to return the same genes\n')
         tryCatch(
-            geneSubset <- select.list(genes, geneSubset, multiple=T),
+            SETTINGS[[ 'geneSubset' ]] <- select.list(SETTINGS[[ 'genes' ]], SETTINGS[[ 'geneSubset' ]], multiple=T),
             error=function(e){
                 cat('\nThere are no genes selected, make sure to press "g" first\n')
             }
         )
         # If cancel was selected return all genes
-        if(length(geneSubset) == 0){
-            geneSubset <- genes
+        if(length(SETTINGS[[ 'geneSubset' ]]) == 0){
+            SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
         }
-        renameFlag <- TRUE
-        heatMapFlag <- TRUE
-        tsSvdBiPlotFlag <- TRUE
+        SETTINGS[[ 'renameFlag' ]] <- TRUE
+        SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
     }
 
     #' @param h make html heatmap
@@ -345,19 +341,19 @@ while(keyPressed != 'q'){
     #' @param  labels to observe groupings for the cells
     if(keyPressed == 'l'){
         # decide what labels to work with
-        labelTypes <- grep("^label", names(tsInfoReduce), value=T)
+        labelTypes <- grep("^label", names(SETTINGS[[ 'tsInfoReduce' ]]), value=T)
         # select the label/labels
         labels <- select.list(labelTypes, multiple = T, 'Select label/s')
-        cellRep <- labels
-        renameFlag <- TRUE
+        SETTINGS[[ 'cellRep' ]] <- labels
+        SETTINGS[[ 'renameFlag' ]] <- TRUE
         if( length(labels) > 0){
-            labelFlag <- T
+            SETTINGS[[ 'labelFlag' ]] <- TRUE
         }else{
             formals(tsHeatMap)$labels <- NA
             formals(tsBoxPlot)$labels <- NA
             formals(tsSVDBiPlot)$labels <- NA
-            heatMapFlag <- T
-            tsSvdBiPlotFlag <- T
+            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+            SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
         }
     }
     
@@ -373,26 +369,26 @@ while(keyPressed != 'q'){
         }else{
             formals(tsBoxPlot)$log <- FALSE
         }
-        heatMapFlag <- TRUE 
-        tsSvdBiPlotFlag <- T
-        geneDfFlag <- TRUE
+        SETTINGS[[ 'heatMapFlag' ]] <- TRUE 
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
+        SETTINGS[[ 'geneDfFlag' ]] <- TRUE
     }
 
     #' @param r Represent Cells with Different Names
     if(keyPressed == 'r'){
-        if(length(tsInfoReduce) > 0){
+        if(length(SETTINGS[[ 'tsInfoReduce' ]]) > 0){
             cat("\nThis function displays the represenation of the cells with the collumn\nvalues from the ts_info\n")
-            cellRep <- select.list(cellRepOptions, cellRep, multiple = T, "Select Cell Represenation")
+            SETTINGS[[ 'cellRep' ]] <- select.list(SETTINGS[[ 'cellRepOptions' ]], SETTINGS[[ 'cellRep' ]], multiple = T, "Select Cell Represenation")
 
-            if(length(cellRep) == 0){
-                cellRep <- cellRepOptions
+            if(length(SETTINGS[[ 'cellRep' ]]) == 0){
+                SETTINGS[[ 'cellRep' ]] <- SETTINGS[[ 'cellRepOptions' ]]
             }
         }else{
             cat("\nPress d to select data to work with\n")
         }
-        renameFlag <- TRUE
-        heatMapFlag <- TRUE
-        tsSvdBiPlotFlag <- TRUE
+        SETTINGS[[ 'renameFlag' ]] <- TRUE
+        SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
     }
 
     #' @param s Save the Current geneDF as a csv to continue work outside
@@ -410,7 +406,7 @@ while(keyPressed != 'q'){
     if(keyPressed == 'ctrl-S'){
         geneFileName <- scan(n=1, what='character')
         geneFileName <- paste0("./searches/", geneFileName, '.txt')
-        write.table(genes[ genes %in% geneSubset ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
+        write.table(SETTINGS[[ 'genes' ]][ SETTINGS[[ 'genes' ]] %in% SETTINGS[[ 'geneSubset' ]] ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
     }
     
     #' @param Singular-vector chooser
@@ -420,7 +416,7 @@ while(keyPressed != 'q'){
         Sys.sleep(0.5)
         singularVectors <- singularVectorPicker(geneDF, 10)
         formals(tsSVDBiPlot)$SV <- singularVectors
-        tsSvdBiPlotFlag <- TRUE
+        SETTINGS[[ 'tsSvdBiPlotFlag' ]] <- TRUE
     }
 
 }

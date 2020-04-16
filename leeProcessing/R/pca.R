@@ -83,7 +83,7 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
     # Add pd labels
     pd <- cbind(pd1, pd2)
     for(i in 1:dim(pd)[1]){
-        segments(0,0, pd[i,1], pd[i,2], col = 'gray90')
+        segments(0,0, pd[i,1], pd[i,2], col = 'gray94')
     }
     text(pd1, pd2, colnames(geneDF), cex = .6, col = colorC, font=2)
     axis(3)
@@ -100,7 +100,7 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
         axes=F,
         xlab = '',
         ylab='')
-    text(pc1, pc2, row.names(geneDF), cex=.8, col=color)
+    text(pc1, pc2, row.names(geneDF), cex=.8, col=color, font=2)
 
     axis(1)
     mtext(paste0('PC', SV[1]), 1, line=3)

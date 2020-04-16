@@ -14,7 +14,7 @@ starfunc <- function(tp){
 #' @param labels, this defines how the cells are grouped in each boxplot
 tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
     # Create the subset of data to work with,
-    geneDF <- tsSuper$ts_data[libraryNames, gene]
+    geneDF <- geneDF[, gene, drop=FALSE]
     if(log){
         #geneDF <- log(geneDF+1)
         ylab <- "log(TPM)"

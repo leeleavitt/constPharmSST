@@ -329,9 +329,11 @@ Gene.Go.Finder <- function(terms="neuron"){
         for(i in terms[-1])
         {
                 ihit <- unique(tsSuper[['gene.go']][grep(i,tsSuper[['gene.go']][,"GO.term.name"],ignore.case=T),1])
-                g.names <- intersect(g.names,ihit)
+                g.names <- union(g.names,ihit)
         }
         g.names <- as.character(tsSuper[['gene.go']][match(g.names,tsSuper[['gene.go']][,1]),"Gene.name"])
+        g.names <- sort(g.names, TRUE)
+        g.names <- intersect(g.names, colnames(tsSuper$ts_data))
         return(g.names)
 }
 
@@ -347,7 +349,10 @@ geneFinder <- function(toSearch){
     foundGenes <- rev(foundGenes)
 
     if(length(foundGenes) == 0){
-        foundGenes <- sort(Gene.Go.Finder(c('voltage', 'sodium')))
+        for(i in 1:length(toSearch)){
+            found <- sort(Gene.Go.Finder(toSearch))
+            foundGenes <- c(found, foundGenes)
+        }
     }
 
     if(length(foundGenes) == 0){
@@ -685,9 +690,9 @@ matrixWrangler <- function(geneDF, scale = c('none')){
     if('log' %in% scale){
         geneDF <- log(geneDF + 1)
     }else if('row' %in% scale){
-        geneDF <- scale(geneDF)
+        geneDF <- scale(geneDF, FALSE, scale = colSums(geneDF))
     }else if ('column' %in% scale) {
-       geneDF <- scale(t(geneDF))
+       geneDF <- scale(t(geneDF), FALSE, scale = colSums(t(geneDF)))
        geneDF <- t(geneDF)
     }
     

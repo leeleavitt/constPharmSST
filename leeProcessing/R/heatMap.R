@@ -1,5 +1,6 @@
 # To click in the heatmap
 tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA, cellSelected = NA){
+    geneDF <- apply(geneDF, 2, rev)
     # Scale the dataframe the way you define    
     if('log' %in% scale){
         geneDF <- log(geneDF + 1)

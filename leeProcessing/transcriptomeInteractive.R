@@ -61,6 +61,7 @@ heatMapFlag <- FALSE
 renameFlag <- FALSE
 geneDfFlag <- FALSE
 tsSvdBiPlotFlag <- FALSE
+boxPlotFlag <- FALSE
 cellsSelection <- NULL
 
 # Make empty vectors for the genes and geneSubset
@@ -109,8 +110,9 @@ while(keyPressed != 'q'){
         if(length(genes) > 0 & length(libraryNames) > 0){
             geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
             geneDF <- matrixWrangler(geneDF)
-            geneDF <- apply(geneDF, 2, rev)
-            row.names(geneDF) <- rev(newLibraryNames)
+            row.names(geneDF) <- newLibraryNames
+            #geneDF <- apply(geneDF, 2, rev)
+            formals(tsBoxPlot)$geneDF <- geneDF
         }
         geneDfFlag <- FALSE
     }
@@ -121,7 +123,6 @@ while(keyPressed != 'q'){
         if(length(genes) > 0 & length(libraryNames) > 0){            
             dev.set(hmWindow)
             tsHeatMap(geneDF)    
-            
             dev.set(tsWindow)
             heatMapFlag <- FALSE
         }
@@ -135,6 +136,12 @@ while(keyPressed != 'q'){
         tsSvdBiPlotFlag <- FALSE
     }
 
+    if(boxPlotFlag){
+        dev.set(bpWindow)
+        tsBoxPlot(geneDF)
+        dev.set(tsWindow)
+        boxPlotFlag <- FALSE
+    }
     
     # After the flags have been parsed, lets move onto which key was pressed
     keyPressed <- readkeygraph("Press q to EXIT")
@@ -151,7 +158,7 @@ while(keyPressed != 'q'){
         formals(tsBoxPlot)$gene <- geneForBox
         dev.set(bpWindow)
         tryCatch(
-            tsBoxPlot(),
+            tsBoxPlot(geneDF),
                 error=function(e)NULL
             )
 
@@ -189,9 +196,10 @@ while(keyPressed != 'q'){
         cellsSelection <- dataSelectorReturn[[2]]
         libraryNames <- row.names(tsInfoReduce)
         
-        formals(tsHeatMap)$labels <- NA
+        #formals(tsHeatMap)$labels <- NA
 
         if(length(genes) > 0){
+            geneDfFlag <- TRUE
             heatMapFlag <- TRUE
             renameFlag <- TRUE
             tsSvdBiPlotFlag <- TRUE
@@ -206,7 +214,12 @@ while(keyPressed != 'q'){
         genes <- geneFinder(toSearch)
         geneSubset <- genes
         cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
-        cat(genes, sep=" ")
+        if(length(genes) < 200){
+            cat(genes, sep=" ")
+        }else{
+            cat(sample(genes)[1:200], sep=" ")
+            cat('\n')
+        }
         renameFlag <- TRUE
         heatMapFlag <- TRUE
         tsSvdBiPlotFlag <- TRUE
@@ -296,6 +309,8 @@ while(keyPressed != 'q'){
         labelTypes <- grep("^label", names(tsInfoReduce), value=T)
         # select the label/labels
         labels <- select.list(labelTypes, multiple = T, 'Select label/s')
+        cellRep <- labels
+        renameFlag <- TRUE
         if( length(labels) > 0){
             # combine these labels
             labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
@@ -307,19 +322,70 @@ while(keyPressed != 'q'){
             formals(tsBoxPlot)$labels <- labelConcat
             formals(tsSVDBiPlot)$labels <- labelConcat
 
-            dev.set(bpWindow)
-            tsBoxPlot()
-            dev.set(tsWindow)
+            boxplotFlag <- TRUE
             heatMapFlag <- T
             tsSvdBiPlotFlag <- T
             renameFlag <- T
         }else{
-            formals(tsHeatMap)[['labels']] <- NA
-            print(formals(tsHeatMap))
+            formals(tsHeatMap)$labels <- NA
+            formals(tsBoxPlot)$labels <- NA
+            formals(tsSVDBiPlot)$labels <- NA
             heatMapFlag <- T
             tsSvdBiPlotFlag <- T
         }
     }
+
+    #' @param Singular-vector chooser
+    if(keyPressed == 'v'){
+        bringToTop(-1)
+        cat("Select the singular vectors that you\nwould like to observe\non the biplot\n")
+        Sys.sleep(0.5)
+        singularVectors <- singularVectorPicker(geneDF, 10)
+        formals(tsSVDBiPlot)$SV <- singularVectors
+        tsSvdBiPlotFlag <- TRUE
+    }
+
+    #' @param f random forest 
+    if(keyPressed == 'f'){
+        # Do a quick random forest
+        if( exists('labelConcat') ){
+            if(nlevels(labelConcat) > 1 ){
+                # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
+                cat("\n1 vs All? [yes or no]\n")
+                compQuestion <- scan(what='character', n=1)                
+                # If you answer yes, now select the label for this
+                if(compQuestion == 'yes' | length(compQuestion) > 0){
+                    labelForComparison <- select.list(levels(labelConcat), multiple=T, title = "Select you label")
+                    rfLabel <- labelConcat == labelForComparison
+                }else{
+                    rfLabel <- labelConcat
+                }
+
+                rft <- randomForest::randomForest(geneDF, rfLabel)
+                # Rank them my importance
+                imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
+                # Make genes this newly ranked order
+                genes <- names(imp)
+
+                if(length(imp) > 200){
+                    cat("How Many genes should I return?\n")
+                    toReturn <- scan(what = 'integer', n=1)
+                    importantGenes <- imp[1:toReturn]
+                }else{
+                    importantGenes <- imp
+                }
+                geneSubset <- names(importantGenes)
+                heatMapFlag <- TRUE
+                geneDfFlag <- TRUE
+                tsSvdBiPlotFlag <- TRUE
+            }else{
+                cat("\nThere are not enough labels to define you cells\n")
+            }
+        }else{
+            cat("\nYou have defined labels yet\n")
+        }
+    }
+
 }
 
 

@@ -62,6 +62,7 @@ renameFlag <- FALSE
 geneDfFlag <- FALSE
 tsSvdBiPlotFlag <- FALSE
 boxPlotFlag <- FALSE
+labelFlag <- FALSE
 cellsSelection <- NULL
 
 # Make empty vectors for the genes and geneSubset
@@ -95,6 +96,25 @@ newLibraryNames <- apply(tsInfoReduce[, cellRep ], 1, paste0, collapse="__")
 
 length(genes)
 while(keyPressed != 'q'){
+    # This makes the new labels and updates the functions with the new labels
+    if(labelFlag){
+        # combine these labels
+        labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
+        # convert to factor, with level specified.
+        labelConcat <- factor(labelConcat, levels= unique(labelConcat))
+        labelConcat <- sort(labelConcat)
+        libraryNames <- names(labelConcat)
+        formals(tsHeatMap)$labels <- labelConcat
+        formals(tsBoxPlot)$labels <- labelConcat
+        formals(tsSVDBiPlot)$labels <- labelConcat
+
+        boxplotFlag <- T
+        heatMapFlag <- T
+        tsSvdBiPlotFlag <- T
+        renameFlag <- T
+        labelFlag <- F
+    }
+    
     # Update the heatmap, this also makes the matrix of 
     # genes vs cell_types
     if(renameFlag){
@@ -106,6 +126,7 @@ while(keyPressed != 'q'){
         geneDfFlag <- TRUE
     }
     
+    # This creates the new gene data frame
     if(geneDfFlag){
         if(length(genes) > 0 & length(libraryNames) > 0){
             geneDF <- tsSuper$ts_data[libraryNames, genes[ genes %in% geneSubset ],drop=F]
@@ -128,6 +149,7 @@ while(keyPressed != 'q'){
         }
     }
 
+    # This updates the biplot
     if(tsSvdBiPlotFlag){
         dev.set(biPlotWindow)
         tsSVDBiPlot(geneDF)
@@ -136,6 +158,7 @@ while(keyPressed != 'q'){
         tsSvdBiPlotFlag <- FALSE
     }
 
+    # This plots the boxplot
     if(boxPlotFlag){
         dev.set(bpWindow)
         tsBoxPlot(geneDF)
@@ -205,6 +228,7 @@ while(keyPressed != 'q'){
             geneDfFlag <- TRUE
             heatMapFlag <- TRUE
             renameFlag <- TRUE
+            labelFlag <- TRUE
             tsSvdBiPlotFlag <- TRUE
         }else{
             cat("\nNo genes have been selected please press g first.\n")
@@ -315,20 +339,7 @@ while(keyPressed != 'q'){
         cellRep <- labels
         renameFlag <- TRUE
         if( length(labels) > 0){
-            # combine these labels
-            labelConcat <- apply(tsInfoReduce[libraryNames, labels, drop=F], 1,paste0,collapse ='__')
-            # convert to factor, with level specified.
-            labelConcat <- factor(labelConcat, levels= unique(labelConcat))
-            labelConcat <- sort(labelConcat)
-            libraryNames <- names(labelConcat)
-            formals(tsHeatMap)$labels <- labelConcat
-            formals(tsBoxPlot)$labels <- labelConcat
-            formals(tsSVDBiPlot)$labels <- labelConcat
-
-            boxplotFlag <- TRUE
-            heatMapFlag <- T
-            tsSvdBiPlotFlag <- T
-            renameFlag <- T
+            labelFlag <- T
         }else{
             formals(tsHeatMap)$labels <- NA
             formals(tsBoxPlot)$labels <- NA
@@ -365,13 +376,14 @@ while(keyPressed != 'q'){
                 }else{
                     rfLabel <- labelConcat
                 }
-
+                # Walk through the forest
                 rft <- randomForest::randomForest(geneDF, rfLabel)
                 # Rank them my importance
                 imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
                 # Make genes this newly ranked order
                 genes <- names(imp)
-
+                
+                # This is a place where i have 
                 if(length(imp) > 200){
                     cat("How Many genes should I return?\n")
                     toReturn <- scan(what = 'integer', n=1)

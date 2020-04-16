@@ -1,15 +1,6 @@
 # To click in the heatmap
 tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA, cellSelected = NA){
     geneDF <- apply(geneDF, 2, rev)
-    # Scale the dataframe the way you define    
-    if('log' %in% scale){
-        geneDF <- log(geneDF + 1)
-    }else if('row' %in% scale){
-        geneDF <- scale(geneDF)
-    }else if ('column' %in% scale) {
-       geneDF <- scale(t(geneDF))
-       geneDF <- t(geneDF)
-    }
 
     geneDF <- t(geneDF)
     par(mar=c(5,12,2,2)+0.1)
@@ -20,7 +11,9 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
     geneNames <- row.names(geneDF)
     yloc <- rep(par('usr')[1] - yinch(.1), length(geneNames))
     xloc <- seq(0,1, length.out = length(geneNames))
-    text_cex <- seq(1, .2, length.out=1000)
+    
+    text_cex <- seq(1, .2, length.out=2000)
+    #plot(xloc~exp(10*text_cex), xlab = "number of labels", ylab = "labelSize")
     text(xloc, yloc, geneNames, srt = 90, adj=1, cex = text_cex[length(geneNames)])
 
     # add the cell name/ cell_type label

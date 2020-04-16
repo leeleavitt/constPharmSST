@@ -26,26 +26,46 @@ tsInteract <- function(){}
 
 # Open the interactive window
 graphics.off()
-dev.new(width = 5 , height = 5)
+tryCatch(
+    windows(width = 5, height =2, , xpos = 0, ypos = 0),
+    error=function(e)
+    dev.new(width = 5 , height = 2)
+)
 tsWindow <- dev.cur()
 par( mar=c(0,0,0,0),xaxt='n', yaxt='n' )
 plot(0,0, xlim = c(-10,10), ylim=c(-10,10), pch='')
 text(0,0, "Welcome to the\nTranscriptome Surfer\nMake this window\nfocused when using\nkeyboard", cex=2, font=2)
 
 # Open the heatmap window
-dev.new(width = 10, height = 8)
+tryCatch(
+    windows(width = 12, height = 7.8, xpos = 0, ypos = 250),
+    error=function(e)
+    dev.new(width = 12, height = 7.8)
+)
 hmWindow <- dev.cur()
 
 # Open the boxplot window
-dev.new(width = 9, height = 5.5)
+tryCatch(
+    windows(width = 9, height = 4.5, xpos = 500, ypos = 0),
+    error=function(e)
+    dev.new(width = 9 , height = 4.5)
+)
 bpWindow <- dev.cur()
 
 # Open the peakfunc
-dev.new(width = 12, height = 4)
+tryCatch(
+    windows(width = 12, height = 4, xpos = 760, ypos = 0),
+    error=function(e)
+    dev.new(width = 12 , height = 4)
+)
 pfWindow <- dev.cur()
 
 # Open the biplot window
-dev.new(width=7, height=7)
+tryCatch(
+    windows(width = 7.8, height = 7.8, xpos = 1150, ypos = 250),
+    error=function(e)
+    dev.new(width = 7 , height = 7)
+)
 biPlotWindow <- dev.cur()
 
 dev.set(tsWindow)
@@ -86,7 +106,6 @@ cellRepOptions <- c(cellRepOptions, labelReps)
 cellRep <- c('Gnomex.Label', 'label_cellType', 'label_experiment')
 # Make the new cell representaion
 newLibraryNames <- c()
-
 newLibraryNames <- apply(tsInfoReduce[, cellRep ], 1, paste0, collapse="__")
 
 
@@ -166,9 +185,10 @@ while(keyPressed != 'q'){
         boxPlotFlag <- FALSE
     }
     
-    # After the flags have been parsed, lets move onto which key was pressed
+    ## After the flags have been parsed, lets move onto which key was pressed
     keyPressed <- readkeygraph("Press q to EXIT")
 
+    #' @param F1 makes the heatmap interactive
     if(keyPressed == 'F1'){
         dev.set(hmWindow)
         clickLoc <- locator(n=1)
@@ -234,6 +254,50 @@ while(keyPressed != 'q'){
             cat("\nNo genes have been selected please press g first.\n")
         }
     }
+    
+    #' @param f random forest 
+    if(keyPressed == 'f'){
+        # Do a quick random forest
+        if( exists('labelConcat') ){
+            if(nlevels(labelConcat) > 1 ){
+                # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
+                cat("\n1 vs All? [yes or no]\n")
+                compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
+                # If you answer yes, now select the label for this
+                if(compQuestion == 'yes' | length(compQuestion) > 0){
+                    labelForComparison <- select.list(levels(labelConcat), multiple=T, title = "Select you label")
+                    # This creates a factor for 1 vs all
+                    rfLabel <- labelConcat == labelForComparison
+                    formals(tsBoxPlot)$labelForComparison <- labelForComparison
+                }else{
+                    rfLabel <- labelConcat
+                }
+                # Walk through the forest
+                rft <- randomForest::randomForest(geneDF, rfLabel)
+                # Rank them my importance
+                imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
+                # Make genes this newly ranked order
+                genes <- names(imp)
+                
+                # This is a place where i have 
+                if(length(imp) > 200){
+                    cat("How Many genes should I return?\n")
+                    toReturn <- scan(what = 'integer', n=1)
+                    importantGenes <- imp[1:toReturn]
+                }else{
+                    importantGenes <- imp
+                }
+                geneSubset <- names(importantGenes)
+                heatMapFlag <- TRUE
+                geneDfFlag <- TRUE
+                tsSvdBiPlotFlag <- TRUE
+            }else{
+                cat("\nThere are not enough labels to define you cells\n")
+            }
+        }else{
+            cat("\nYou have defined labels yet\n")
+        }
+    }
 
     #' @param g Select genes
     if(keyPressed == 'g'){
@@ -277,6 +341,42 @@ while(keyPressed != 'q'){
         heatMapper(geneDF)
         print(get('cf', .GlobalEnv))
     }
+    
+    #' @param  labels to observe groupings for the cells
+    if(keyPressed == 'l'){
+        # decide what labels to work with
+        labelTypes <- grep("^label", names(tsInfoReduce), value=T)
+        # select the label/labels
+        labels <- select.list(labelTypes, multiple = T, 'Select label/s')
+        cellRep <- labels
+        renameFlag <- TRUE
+        if( length(labels) > 0){
+            labelFlag <- T
+        }else{
+            formals(tsHeatMap)$labels <- NA
+            formals(tsBoxPlot)$labels <- NA
+            formals(tsSVDBiPlot)$labels <- NA
+            heatMapFlag <- T
+            tsSvdBiPlotFlag <- T
+        }
+    }
+    
+    #' @param n normalization Save the gene list you have updated 
+    if(keyPressed == 'n'){
+        matrixWranglerOptions <-  c("row", "column", "none", "log")
+        cat('\nHow would you like to scale the heatmap?\n')
+        newOptions <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
+        formals(matrixWrangler)$scale <- newOptions
+
+        if('log' %in% newOptions){
+            formals(tsBoxPlot)$log <- TRUE
+        }else{
+            formals(tsBoxPlot)$log <- FALSE
+        }
+        heatMapFlag <- TRUE 
+        tsSvdBiPlotFlag <- T
+        geneDfFlag <- TRUE
+    }
 
     #' @param r Represent Cells with Different Names
     if(keyPressed == 'r'){
@@ -313,42 +413,6 @@ while(keyPressed != 'q'){
         write.table(genes[ genes %in% geneSubset ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
     }
     
-    #' @param normalization Save the gene list you have updated 
-    if(keyPressed == 'n'){
-        matrixWranglerOptions <-  c("row", "column", "none", "log")
-        cat('\nHow would you like to scale the heatmap?\n')
-        newOptions <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
-        formals(matrixWrangler)$scale <- newOptions
-
-        if('log' %in% newOptions){
-            formals(tsBoxPlot)$log <- TRUE
-        }else{
-            formals(tsBoxPlot)$log <- FALSE
-        }
-        heatMapFlag <- TRUE 
-        tsSvdBiPlotFlag <- T
-        geneDfFlag <- TRUE
-    }
-
-    #' @param  labels to observe groupings for the cells
-    if(keyPressed == 'l'){
-        # decide what labels to work with
-        labelTypes <- grep("^label", names(tsInfoReduce), value=T)
-        # select the label/labels
-        labels <- select.list(labelTypes, multiple = T, 'Select label/s')
-        cellRep <- labels
-        renameFlag <- TRUE
-        if( length(labels) > 0){
-            labelFlag <- T
-        }else{
-            formals(tsHeatMap)$labels <- NA
-            formals(tsBoxPlot)$labels <- NA
-            formals(tsSVDBiPlot)$labels <- NA
-            heatMapFlag <- T
-            tsSvdBiPlotFlag <- T
-        }
-    }
-
     #' @param Singular-vector chooser
     if(keyPressed == 'v'){
         bringToTop(-1)
@@ -357,50 +421,6 @@ while(keyPressed != 'q'){
         singularVectors <- singularVectorPicker(geneDF, 10)
         formals(tsSVDBiPlot)$SV <- singularVectors
         tsSvdBiPlotFlag <- TRUE
-    }
-
-    #' @param f random forest 
-    if(keyPressed == 'f'){
-        # Do a quick random forest
-        if( exists('labelConcat') ){
-            if(nlevels(labelConcat) > 1 ){
-                # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
-                cat("\n1 vs All? [yes or no]\n")
-                compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
-                # If you answer yes, now select the label for this
-                if(compQuestion == 'yes' | length(compQuestion) > 0){
-                    labelForComparison <- select.list(levels(labelConcat), multiple=T, title = "Select you label")
-                    # This creates a factor for 1 vs all
-                    rfLabel <- labelConcat == labelForComparison
-                    formals(tsBoxPlot)$labelForComparison <- labelForComparison
-                }else{
-                    rfLabel <- labelConcat
-                }
-                # Walk through the forest
-                rft <- randomForest::randomForest(geneDF, rfLabel)
-                # Rank them my importance
-                imp <- rft$importance[order(rft$importance[,1], decreasing = TRUE),]
-                # Make genes this newly ranked order
-                genes <- names(imp)
-                
-                # This is a place where i have 
-                if(length(imp) > 200){
-                    cat("How Many genes should I return?\n")
-                    toReturn <- scan(what = 'integer', n=1)
-                    importantGenes <- imp[1:toReturn]
-                }else{
-                    importantGenes <- imp
-                }
-                geneSubset <- names(importantGenes)
-                heatMapFlag <- TRUE
-                geneDfFlag <- TRUE
-                tsSvdBiPlotFlag <- TRUE
-            }else{
-                cat("\nThere are not enough labels to define you cells\n")
-            }
-        }else{
-            cat("\nYou have defined labels yet\n")
-        }
     }
 
 }

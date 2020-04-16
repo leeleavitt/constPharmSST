@@ -12,7 +12,7 @@ starfunc <- function(tp){
 #' @param gene the gene to view these cells
 #' @param log boolean, log scale the axis
 #' @param labels, this defines how the cells are grouped in each boxplot
-tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
+tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelForComparison = NA){
     # Create the subset of data to work with,
     geneDF <- geneDF[, gene, drop=FALSE]
     if(log){
@@ -47,7 +47,8 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
         xlab = "",
         ylab = ylab, 
         xaxs = 'n',
-        names = boxLabels,
+        axes=FALSE,
+        #names = '',
         las = 2, 
         varwidth = T,
         main = gene,
@@ -61,6 +62,21 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
         #medlwd=2
     )
 
+    box()
+    axis(2)
+    axis(1, seq(1,length(boxLabels)), labels = NA)
+    par(xpd=T)
+    text(
+        seq(1,length(boxLabels)),
+        rep(par('usr')[3]-yinch(.2), length(boxLabels)),
+        boxLabels,  
+        srt=90,
+        col = ifelse(levels(labelConcat) == labelForComparison, 'red', 'black'),
+        font = ifelse(levels(labelConcat) == labelForComparison, 2 , 1),
+        adj = 1
+    )
+
+
     # Added point labels
     x.jit <- jitter(as.integer(labelConcat))
     pointLabels <- as.character(tsInfoReduce[libraryNames, 'label_subClass'])
@@ -68,16 +84,23 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL){
     text(x.jit, geneDF, pointLabels, cex=.8, font=2)
 
     # perform kevins regression analysis
-    glt <- glm(geneDF ~ labelConcat ) 
-    strs <- lapply(coefficients(summary(glt))[,4],starfunc) #
-    text(
-        1:(length(strs)), 
-        bpDims$stats[3,1:(length(strs))],
-        strs,
-        pos=1,
-        cex=2, 
-        col = 'red'
-    )
+    if(!is.na(labelForComparison)){
+        toNotLabel <- which(levels(labelConcat) == labelForComparison)
+        labelConcat <- relevel(labelConcat, labelForComparison)
+        glt <- glm( geneDF ~ labelConcat ) 
+        strs <- lapply(coefficients(summary(glt))[,4][-1],starfunc) #
+        
+        strSeq <- seq(1, length(levels(labelConcat))) 
+        strSeq <- strSeq[strSeq!=toNotLabel]
+        text(
+            strSeq, 
+            bpDims$stats[3,strSeq],
+            strs,
+            pos=1,
+            cex=2, 
+            col = 'red'
+        )
+    }
 
     # Add gene name synonyms to the bottom left
     aliases <- as.character(tsSuper$gene_info[tsSuper$gene_info$Symbol == gene, 'Aliases'])

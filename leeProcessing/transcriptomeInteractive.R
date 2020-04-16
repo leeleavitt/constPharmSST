@@ -181,7 +181,10 @@ while(keyPressed != 'q'){
         
         # Replo the heatmap with where you clicked
         dev.set(hmWindow)
-        tsHeatMap(geneDF, geneSelected = geneSelected, cellSelected = cellSelected)
+        formals(tsHeatMap)$geneSelected <- geneSelected
+        formals(tsHeatMap)$cellSelected <- cellSelected
+        
+        tsHeatMap(geneDF)
         
         dev.set(tsWindow)
     }
@@ -352,11 +355,13 @@ while(keyPressed != 'q'){
             if(nlevels(labelConcat) > 1 ){
                 # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
                 cat("\n1 vs All? [yes or no]\n")
-                compQuestion <- scan(what='character', n=1)                
+                compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
                 # If you answer yes, now select the label for this
                 if(compQuestion == 'yes' | length(compQuestion) > 0){
                     labelForComparison <- select.list(levels(labelConcat), multiple=T, title = "Select you label")
+                    # This creates a factor for 1 vs all
                     rfLabel <- labelConcat == labelForComparison
+                    formals(tsBoxPlot)$labelForComparison <- labelForComparison
                 }else{
                     rfLabel <- labelConcat
                 }

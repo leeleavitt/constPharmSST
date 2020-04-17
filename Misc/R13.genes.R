@@ -32,8 +32,8 @@ tail(sort(table(as.character(mouse.gene.go[is.element(mouse.gene.go[,"Gene.name"
 # manually set go terms 
 g0.terms <- c('integral component of membrane','ion channel activity')
 g1.terms <- c('integral component of membrane','G-protein coupled receptor activity')
-g1 <- Gene.Go.Finder(g1.terms)
-g0 <- Gene.Go.Finder(g0.terms)
+g1 <- geneGoFinder(g1.terms)
+g0 <- geneGoFinder(g0.terms)
 g4 <- g1 # just use ion channels for now, union(g1,g0) gives ion channel and GPCR
 g4 <- intersect(g4,row.names(tpm)) 
 gt0func <- function(x){sum(x > 0)}

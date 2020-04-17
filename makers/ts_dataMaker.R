@@ -8,7 +8,7 @@ load('./leeProcessing/rdSuper.Rdata')
 # Load and Clean the transcriptome info
 # The first thing we need to do is make a data base of all cells for each 
 ts_info <- read.xlsx("./leeProcessing/FX SS library data 200218.xlsx",1)
-ts_info <- ts_info_cleaner(ts_info)
+ts_info <- tsInfoCleaner(ts_info)
 
 # Load up the transcriptome data
 ts_data <- read.csv('./leeProcessing/dat.out.032020.csv')

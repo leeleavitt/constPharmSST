@@ -9,7 +9,7 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
     par(xpd=T)
     # add the gene label / x labels
     geneNames <- row.names(geneDF)
-    yloc <- rep(par('usr')[1] - yinch(.1), length(geneNames))
+    yloc <- rep(par('usr')[1] - yinch(.2), length(geneNames))
     xloc <- seq(0,1, length.out = length(geneNames))
     
     text_cex <- seq(1, .2, length.out=2000)

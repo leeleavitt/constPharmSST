@@ -11,7 +11,7 @@ names(rdSuper)[9] <- 'RD.180613.43.m.p1'
 # Load and Clean the transcriptome info
 # The first thing we need to do is make a data base of all cells for each 
 ts_info <- read.xlsx("./leeProcessing/rawData/FX SS library data 200218.xlsx",1)
-ts_info <- ts_info_cleaner(ts_info)
+ts_info <- tsInfoCleaner(ts_info)
 
 # load in the tsData
 ts_data <- read.csv('./leeProcessing/rawData/ts_data.csv', check.names=F)

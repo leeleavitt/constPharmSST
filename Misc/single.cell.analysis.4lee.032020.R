@@ -4,8 +4,8 @@ load("cell.type.blob.032020.Rdata")
 #cell.details.032020 row.names are the gnomex ids.
 #mouse.gene.go has all go terms for gene ids.
 #hkg is a list of house keeping gene names
-#Gene.Go.Finder is function that takes a vector of strings and returns the names of all genes with those strings in their GO terms e.g.
-#Gene.Go.Finder(c("ion channel"))
+#geneGoFinder is function that takes a vector of strings and returns the names of all genes with those strings in their GO terms e.g.
+#geneGoFinder(c("ion channel"))
 #TypeSig deprecated
 #tpm gene count values scaled 1 million for each sample.
 #def.genes is a list of genes used to define type (e.g. Calca)
@@ -64,11 +64,11 @@ for(i in test.names[3:length(test.names)])
 #combine the results with the raw counts
 dat.out <- cbind(cell.type.counts.032020[gi,],tpm.res)
 #mark ion channel genes and GPCR genes
-g.ion <- Gene.Go.Finder(c("ion channel"))
+g.ion <- geneGoFinder(c("ion channel"))
 dat.out[,"ion.channel"] <- 0
 dat.out[is.element(dat.out[,"Gene.name"],g.ion),"ion.channel"] <- 1
 
-gs1 <- Gene.Go.Finder(c("G-protein coupled receptor activity"))
+gs1 <- geneGoFinder(c("G-protein coupled receptor activity"))
 dat.out[,"GPCR"] <- 0
 dat.out[is.element(dat.out[,"Gene.name"],gs1),"ion.channel"] <- 1
 

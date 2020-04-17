@@ -16,8 +16,8 @@
 
 # goTermSummary[ionGoTerms]
 
-# sort(Gene.Go.Finder("ion channel"))
-# sort(Gene.Go.Finder("G-protein"))
+# sort(geneGoFinder("ion channel"))
+# sort(geneGoFinder("G-protein"))
 
 
 # docs <- tm::Corpus(tm::VectorSource(goTerms))

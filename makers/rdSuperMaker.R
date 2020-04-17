@@ -2,7 +2,7 @@
 require(xlsx)
 ts_info <- read.xlsx("./leeProcessing/rawData/FX SS library data 200218.xlsx",1)
 source("./leeProcessing/transcriptome_pharmer.r")
-tsInfoClean <- ts_info_cleaner(ts_info)
+tsInfoClean <- tsInfoCleaner(ts_info)
 
 # Now lets change our Directory to where the experiments are saved
 mainDir <- "C:/Users/leele/Documents/sst/"

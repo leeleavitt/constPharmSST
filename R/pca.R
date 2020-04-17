@@ -48,12 +48,12 @@ singularVectorPicker <- function(geneDF, totalSV = 10){
 #' @param geneDF is the matrix of cells vs genes
 #' @param SV is the singular vectors to use
 #' @param labels is how you want the labels to be displayed color wise
-tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
+tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA, geneSelected = NA){
     geneDF[is.na(geneDF)]<-0
     if( nlevels(labels) > 2 | !is.na(labels) ){
         newPallete <- RColorBrewer::brewer.pal(n=nlevels(labels), 'Dark2')
         palette(newPallete)
-        color <- rev(as.integer(labels))
+        color <- as.integer(labels)
     }else{
         color <- 'black'
     }
@@ -82,10 +82,21 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
 
     # Add pd labels
     pd <- cbind(pd1, pd2)
+    row.names(pd) <- colnames(geneDF)
+
+    # Add the starplot
     for(i in 1:dim(pd)[1]){
         segments(0,0, pd[i,1], pd[i,2], col = 'gray94')
     }
-    text(pd1, pd2, colnames(geneDF), cex = .6, col = colorC, font=2)
+    
+    text(
+        pd1, 
+        pd2, 
+        colnames(geneDF), 
+        cex = .6, 
+        col = ifelse(row.names(pd) == geneSelected, 'red', colorC), 
+        font=ifelse(row.names(pd) == geneSelected, 2, 1)
+    )
     axis(3)
     mtext(paste0('PD', SV[1]), 3, line=3)
     axis(4)
@@ -107,5 +118,17 @@ tsSVDBiPlot <- function(geneDF, SV = NA, labels = NA){
 
     axis(2)
     mtext(paste0('PC', SV[2]), 2, line=3)
+
+    # Leave the plot with an invisible gene label for us to now work with
+        par(new=T, xpd=T)
+
+    plot(pd1, 
+        pd2, 
+        pch  = '', 
+        axes=F,
+        xlab = '',
+        ylab=''
+    )
+    return(pd)
 }
 

@@ -2,13 +2,13 @@
 load("/Users/kevinchase/Box Sync/SS transcriptome/Data/Transcriptomics/cell.type.blob.061219.Rdata")
 
 #cell.type.blob... currently consists of:
-#cell.details.061219 cell.type.counts.061219 def.genes Gene.Go.Finder hkg mouse.gene.desc mouse.gene.go tpm TypeSig
+#cell.details.061219 cell.type.counts.061219 def.genes geneGoFinder hkg mouse.gene.desc mouse.gene.go tpm TypeSig
 #cell.type.counts.061219 row.names are gene ids.  rows are genes columns are samples with descriptors. raw counts.  first column has Gene.name
 #cell.details.061219 row.names are the gnomex ids.
 #mouse.gene.go has all go terms for gene ids.
 #hkg is a list of house keeping gene names
-#Gene.Go.Finder is function that takes a vector of strings and returns the names of all genes with those strings in their GO terms e.g.
-#Gene.Go.Finder(c("ion channel"))
+#geneGoFinder is function that takes a vector of strings and returns the names of all genes with those strings in their GO terms e.g.
+#geneGoFinder(c("ion channel"))
 #TypeSig deprecated
 #tpm gene count values scaled 1 million for each sample.
 #def.genes is a list of genes used to define type (e.g. Calca)
@@ -75,7 +75,7 @@ tpm.032020 <- sweep(tpm.032020,2,apply(tpm.032020,2,sum)/1000000,'/')
 apply(tpm.032020,2,sum)
 
 #finally save the new blob with the new name
-save(list=c("cell.type.counts.032020","cell.details.032020","mouse.gene.go","hkg","Gene.Go.Finder","TypeSig","tpm.032020","def.genes","mouse.gene.desc"),file="cell.type.blob.032020.Rdata")
+save(list=c("cell.type.counts.032020","cell.details.032020","mouse.gene.go","hkg","geneGoFinder","TypeSig","tpm.032020","def.genes","mouse.gene.desc"),file="cell.type.blob.032020.Rdata")
 
 
 #adjust the naming and the labels grrrrr

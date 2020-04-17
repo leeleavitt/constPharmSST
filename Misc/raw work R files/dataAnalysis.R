@@ -11,7 +11,7 @@ libraryNames <- row.names(tsInfoRed)
 newLibraryNames <- paste0(tsInfoRed$Gnomex.Label,'__',tsInfoRed$label_cellType,'__', tsInfoRed$label_experiment)
 
 # I need to make a function that looks at the input 
-# If the input doesn't return genes then us Gene.Go.Finder
+# If the input doesn't return genes then us geneGoFinder
 #hkGenes <- as.character(tsSuper$gene.desc[tsSuper$gene.desc$Gene.stable.ID %in% hkg,'Gene.name'])
 
 #toSearch <- c('calca', 'mrgprd','trpa1', 'trpm8', 'trpv1','kcna','p2rx', 'p2ry', 'cacna1h')

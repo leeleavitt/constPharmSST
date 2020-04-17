@@ -29,6 +29,5 @@ if(length( ls(pattern = 'tsSuper') ) < 1 ){
 }
 
 profileLoader()
-#invisible(tsInteract(SETTINGS))
 
 

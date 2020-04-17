@@ -228,6 +228,18 @@ tsInteract <- function(SETTINGS){
                     PeakFunc7(tsSuper$RD[[rdName]], paste0("X.", cellName), dat.n = names(tsSuper$RD[rdName])),
                     error=function(e)NULL
                 )
+            }else{
+                dev.set(pfWindow)
+                tryCatch(
+                    {
+                    cellName <- as.numeric(Reduce(c,strsplit(as.character(cellName), ',')))
+                    cellName <- paste0("X.", cellName)
+                    print(cellName)
+                    LinesEvery.6(tsSuper$RD[[rdName]], cellName, dat.n = names(tsSuper$RD[rdName]))
+                    }
+                    ,error=function(e)NULL
+                )
+
             }
             
             # Replo the heatmap with where you clicked

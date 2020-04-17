@@ -43,7 +43,7 @@ LinesEvery_ts <- function(exps = exps, exp_info = exp_info, reduce=F, levs=NULL,
     if(pdf){dev.off()}  
 }
 
-LinesEvery.6 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=NULL, t.type="mp.1", snr=NULL,lmain="",cols="black", levs=NULL, levs.cols="grey90", values=NULL,plot.new=T,sf=1,lw=1,bcex=1,p.ht=7,p.wd=10, lns=T, pts=F, underline=T,dat.n=NULL, gnomex_lab=NA){
+LinesEvery.6 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=NULL, t.type="blc", snr=NULL,lmain="",cols="black", levs=NULL, levs.cols="grey90", values=NULL,plot.new=F,sf=1,lw=2,bcex=1,p.ht=7,p.wd=10, lns=T, pts=F, underline=T,dat.n=NULL, gnomex_lab=NA){
     #require(RColorBrewer)
     dat.name<-deparse(substitute(dat))
     if(dat.name=="dat" | dat.name == "tmp.rd" | dat.name == "tmp_rd"){
@@ -113,7 +113,7 @@ LinesEvery.6 <- function(dat,m.names, img="img1",channel=NULL,pic.plot=TRUE,zf=N
             plot(xseq,t.dat[,m.names[1]],ylim=c(0,hbc),xlab="",main=lmain,type="n",yaxt="n",xlim=c(min(xseq)-1.5,max(xseq)), ylab="")#-sf
             #axis(1, at=seq(floor(min(t.dat[,1])),ceiling(max(t.dat[,1])), 1))
             par(xpd=T)
-            text(rep(0,length(m.names))-xinch(.3),seq(1,length(m.names))*sf+t.dat[1,m.names],paste0(m.names,"_", gnomex_lab[m.names,]), cex=.5,col=cols,pos=3)
+            text(rep(0,length(m.names))-xinch(.3),seq(1,length(m.names))*sf+t.dat[1,m.names],paste0(m.names), cex=.5,col=cols,pos=3)
             par(xpd=F)
         ## Tool for adding window region labeling
             if(is.null(levs)){levs <- setdiff(unique(as.character(dat$w.dat[,"wr1"])),"")

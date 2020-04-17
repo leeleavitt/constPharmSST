@@ -14,6 +14,8 @@ This a package developed to combine calcium imaging data with single cell transc
   * Spend some time exploring the folder [Lee Leavitt](./profiles/Lee_Leavitt/Searches) for a few examples of different types of searches you can do.
   ![][image4]
 
+## 5. Now we will use the keyboard to guide us during the rest of the data analysis.
+
 
 
 

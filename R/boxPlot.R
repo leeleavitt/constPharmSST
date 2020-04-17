@@ -1,6 +1,7 @@
 # function for labeling significance in R
 starfunc <- function(tp){
 	sigc <- ""
+    if(is.na(tp)){tp <- 1}
 	if(tp < .1){sigc <- "-"}
 	if(tp < .05){sigc <- "*"}	
 	if(tp < .01){sigc <- "**"}
@@ -94,25 +95,6 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
     pointLabels[is.na(pointLabels)] <- 'x'
     text(x.jit, geneDF, pointLabels, cex=.8, font=2)
 
-    # perform kevins regression analysis
-    if(!is.na(labelForComparison)){
-        toNotLabel <- which(levels(labelConcat) == labelForComparison)
-        labelConcat <- relevel(labelConcat, labelForComparison)
-        glt <- glm( geneDF ~ labelConcat ) 
-        strs <- lapply(coefficients(summary(glt))[,4][-1],starfunc) #
-        
-        strSeq <- seq(1, length(levels(labelConcat))) 
-        strSeq <- strSeq[strSeq!=toNotLabel]
-        text(
-            strSeq, 
-            bpDims$stats[3,strSeq],
-            strs,
-            pos=1,
-            cex=2, 
-            col = 'red'
-        )
-    }
-
     # Add gene name synonyms to the top right
     aliases <- as.character(tsSuper$gene_info[tsSuper$gene_info$Symbol == gene, 'Aliases'])
     if(length(aliases) == 0){
@@ -142,5 +124,25 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
     cat('\n\n\n\n')
     cat(strsplit(other_designations, "[|]")[[1]], sep='\n')
     cat('\n\n\n\n')
+
+    # perform kevins regression analysis
+    if(!is.na(labelForComparison) | length(labelForComparison) > 2){
+        toNotLabel <- which(levels(labelConcat) == labelForComparison)
+        labelConcat <- relevel(labelConcat, labelForComparison)
+        glt <- glm( geneDF ~ labelConcat ) 
+        strs <- lapply(coefficients(summary(glt))[,4][-1],starfunc) #
+        
+        strSeq <- seq(1, length(levels(labelConcat))) 
+        strSeq <- strSeq[strSeq!=toNotLabel]
+        text(
+            strSeq, 
+            bpDims$stats[3,strSeq],
+            strs,
+            pos=1,
+            cex=2, 
+            col = 'red'
+        )
+    }
+
 
 }

@@ -14,8 +14,15 @@ This a package developed to combine calcium imaging data with single cell transc
   * Spend some time exploring the folder [Lee Leavitt](./profiles/Lee_Leavitt/Searches) for a few examples of different types of searches you can do.
   ![][image4]
 
-## 5. Now we will use the keyboard to guide us during the rest of the data analysis.
-
+## 5. Now we will use the keyboard to guide us during the rest of the data analysis. Follow this.
+  1. [Visualizations](./Misc/keyBoardWalkthroughs/visualizations.md):
+      1. Genes, and gene-subset
+      2. Cell labels
+      3. Matrix normalization
+  2. [Using labels to identify informative genes](./Misc/keyBoardWalkthroughs/labelInformation.md)
+      1. Using **RandomForest** against selected labels to rank genes in terms of importance
+      2. Using linear regression to identify statistical significance of difference across all labels vs selected label.
+  3. [Interacting with **heatmap** and **biPlot**](./Misc/keyBoardWalkthroughs/interactivity.md)
 
 
 

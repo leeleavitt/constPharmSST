@@ -8,7 +8,7 @@ profileLoader <- function(){
     cat("\nSelect the profile you would like to use\n")
     chosenProfile <- select.list(profilesToChoose, title="Profiles")
 
-    if(chosenProfile == 'New Profile' | length(chosenProfile) == ""){
+    if(chosenProfile == 'New Profile' | chosenProfile == ""){
         cat('\nEnter the name of your profile, buddy\n')
         chosenProfile <- scan(what = 'character', n=1, quiet = T, sep=">")
         
@@ -20,7 +20,7 @@ profileLoader <- function(){
         dir.create(paste0("./profiles/", chosenProfile,'/searches'))    
         
         # Give them a default searches to begin working with
-        invisible(file.copy("./rawData/goTermSearch.txt", paste0("./profiles/",chosenProfile,'/searches')))
+        invisible(file.copy("./Misc/rawData/goTermSearch.txt", paste0("./profiles/",chosenProfile,'/searches')))
     }
     setwd(paste0("./profiles/", chosenProfile))
 
@@ -30,4 +30,5 @@ profileLoader <- function(){
     }else{
         load("SETTINGS.Rdata", globalenv())
     }
+    invisible(tsInteract(SETTINGS))
 }

@@ -232,7 +232,7 @@ tsInteract <- function(SETTINGS){
             
             # Replo the heatmap with where you clicked
             dev.set(hmWindow)
-            formals(tsHeatMap)$geneSelected <- geneSelected
+            formals(tsHeatMap)$geneSelected <- geneForBox
             formals(tsHeatMap)$cellSelected <- cellSelected
             
             SETTINGS[[ 'heatMapFlag' ]] <- TRUE
@@ -253,12 +253,15 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'boxPlotFlag' ]] <- TRUE
 
             # update the heatMap
-            formals(tsHeatMap)$geneSelected <- clickLoc
+            formals(tsHeatMap)$geneSelected <- geneSelected
             SETTINGS[[ 'heatMapFlag' ]] <- TRUE
 
             dev.set(tsWindow)
         }
 
+        if(keyPressed == 'b'){
+            SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+        }
         #' @param d Select cells 
         if(keyPressed == 'd'){
             # Function to return ts_info_Reduced
@@ -270,6 +273,10 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'libraryNames' ]] <- row.names(SETTINGS[[ 'tsInfoReduce' ]])
             
             formals(tsBoxPlot)$SETTINGS <- SETTINGS
+
+            formals(tsBoxPlot)$labelForComparison <- NA
+            formals(tsHeatMap)$labelForComparison <- NA
+
 
             if(length(SETTINGS[[ 'genes' ]]) > 0){
                 SETTINGS[[ 'geneDfFlag' ]] <- TRUE
@@ -299,6 +306,7 @@ tsInteract <- function(SETTINGS){
                         )
                     rfLabel <- SETTINGS[[ 'labelConcat' ]] %in% SETTINGS[[ 'labelForComparison' ]]
                     formals(tsBoxPlot)$labelForComparison <- SETTINGS[[ 'labelForComparison' ]]
+                    formals(tsHeatMap)$labelForComparison <- SETTINGS[[ 'labelForComparison' ]] 
                 }else{
                     rfLabel <- SETTINGS[[ 'labelConcat' ]]
                 }
@@ -306,6 +314,7 @@ tsInteract <- function(SETTINGS){
                 # This is a place where i have 
                 if(dim(geneDF)[2] > 200){
                     bringToTop(-1)
+                    alarm()
                     cat("How Many genes should I return?\n")
                     toReturn <- scan(what = 'integer', n=1) 
                 }else{
@@ -459,6 +468,8 @@ tsInteract <- function(SETTINGS){
         if(keyPressed == 'q'){
             graphics.off()
             save(SETTINGS, file = "SETTINGS.Rdata")
+            setwd("..")
+            setwd("..")
         }
     }
 }

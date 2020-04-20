@@ -177,7 +177,10 @@ tsInteract <- function(SETTINGS){
         # This updates the biplot
         if(SETTINGS[[ 'biPlotFlag' ]]){
             dev.set(biPlotWindow)
-            SETTINGS[[ 'biPlotDims' ]] <- tsSVDBiPlot(geneDF)
+            tryCatch(
+                SETTINGS[[ 'biPlotDims' ]] <- tsSVDBiPlot(geneDF),
+                error=function(e)NULL
+            )
 
             dev.set(tsWindow)
             SETTINGS[[ 'biPlotFlag' ]] <- FALSE
@@ -274,10 +277,12 @@ tsInteract <- function(SETTINGS){
 
             dev.set(tsWindow)
         }
+        
 
         if(keyPressed == 'b'){
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
         }
+
         #' @param d Select cells 
         if(keyPressed == 'c'){
             # Function to return ts_info_Reduced
@@ -332,7 +337,10 @@ tsInteract <- function(SETTINGS){
                     bringToTop(-1)
                     alarm()
                     cat("How Many genes should I return?\n")
-                    toReturn <- scan(what = 'integer', n=1) 
+                    toReturn <- scan(what = 'integer', n=1)
+                    if(length(toReturn) == 0){
+                        toReturn <- 199
+                    }
                 }else{
                     toReturn <- dim(geneDF)[2]
                 }
@@ -457,6 +465,7 @@ tsInteract <- function(SETTINGS){
         if(keyPressed == 's'){
             if(!is.null(geneDF)){
                 cat('\nPlease enter the name of the file\n')
+                bringToTop(-1)
                 fileName <- scan(n=1,what='character', quiet=TRUE)
                 fileName <- paste0("./savedCsv/",fileName,'.csv')
                 geneDF <- apply(geneDF, 2, rev)
@@ -486,14 +495,18 @@ tsInteract <- function(SETTINGS){
             graphics.off()
             cat("\nWould you like to rename your profile?\n")
             
-            renameLogic <- select.list(c('Yes', 'no'), title = "Rename Profile?")
+            renameLogic <- select.list(c('yes', 'no'), title = "Rename Profile?")
             if(renameLogic == 'yes'){
-                oldFolder <- rev(strsplit(getwd(), '/')[[1]])[1]
+                oldFolder <- paste0("./profiles/", rev(strsplit(getwd(), '/')[[1]])[1])
                 # Go back two directories
                 setwd("..")
                 setwd("..")
                 
                 # Get the new profile name
+                cat("\n!!!!!CLOSE ALL FILES AND FOLDERS!!!\n")
+                alarm()
+                Sys.sleep(.5)
+                alarm()
                 cat('\nEnter the name of your profile, buddy\n')
                 newFolder <- scan(what = 'character', n=1, quiet = T, sep=">")
                 
@@ -501,18 +514,31 @@ tsInteract <- function(SETTINGS){
                 newFolder <- paste0("./profiles/", newFolder)
                 dir.create(newFolder)
                 # Old folder
-                oldFolder <- paste0("./profiles/", oldFolder)
+                oldFiles <- list.dirs(oldFolder, recursive=TRUE)[-1]
                 
                 # Make the savedCsv folder
                 file.copy(
-                    oldFolder,
+                    oldFiles,
                     newFolder,
                     recursive=TRUE
                 )
+                
+                # Now save the Settings to the correct folder
+                setwd(newFolder)
+                save(SETTINGS, file = "SETTINGS.Rdata")
+                setwd("..")
+                setwd("..")
+
+                # When done, delete the older folder!
                 unlink(oldFolder, TRUE, TRUE)
             }else{
                 setwd("..")
                 setwd("..")
+            }
+            cat('\nWould you like to keep analyzing?\n')
+            continueLogic <- select.list(c('yes', 'no'))
+            if(continueLogic == 'yes'){
+                profileLoader()
             }
         }
     }

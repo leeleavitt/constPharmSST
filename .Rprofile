@@ -1,3 +1,15 @@
+options(locatorBell=F)
+
+# # Prevents R asking you to save
+# utils::assignInNamespace("q", 
+#                                 function(save = "no", status = 0, runLast = TRUE) {
+#      .Internal(quit(save, status, runLast))
+# }, "base")    
+# utils::assignInNamespace("quit", 
+#                                 function(save = "no", status = 0, runLast = TRUE) {
+#      .Internal(quit(save, status, runLast))
+#  }, "base")
+
 #setwd("C:/Users/leele/Documents/sst/")
 # Required packages
 library(utils)
@@ -28,6 +40,7 @@ if(length( ls(pattern = 'tsSuper') ) < 1 ){
     alarm()
 }
 
-profileLoader()
-
-
+.First <- function(){
+    profileLoader()
+    q()
+}

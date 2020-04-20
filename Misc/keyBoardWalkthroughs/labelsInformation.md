@@ -1,5 +1,5 @@
 # Interactivity and Gene Informativeness
-Often times we find our selves with too many genes to realistically interpret. Fortunately we've included 3 tools to help you in this search for informative genes. Here we present 
+Often times we find our selves with too many genes to realistically interpret. Fortunately we've included three tools to help you in this search for informative genes. Here we present 
 1. **RandomForest**: 1 vs all, or all vs all
 2. **PCA** (Principal Component Analysis) with interactive singular vector selection
 3. **Linear regression**: for statistical significance of genes.

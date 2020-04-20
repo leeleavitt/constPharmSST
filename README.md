@@ -19,7 +19,7 @@ This a package developed to combine calcium imaging data with single cell transc
        1. Genes, and gene-subset
        2. Cell labels
        3. Matrix normalization
-    2. [Interactivity and Gene Informativeness](./Misc/keyBoardWalkthroughs/labelsInformation.md): Using labels to identify informative genes
+    2. [Interactivity and gene Informativeness](./Misc/keyBoardWalkthroughs/labelsInformation.md) : Using labels to identify informative genes
        1. **RandomForest** against selected labels to rank genes in terms of importance
        2. Using linear regression to identify statistical significance of difference across all labels vs selected label.
     3. [Saving and reloading](./Misc/keyBoardWalkthroughs/saving.md)

@@ -536,7 +536,7 @@ tsInteract <- function(SETTINGS){
                 setwd("..")
             }
             cat('\nWould you like to keep analyzing?\n')
-            continueLogic <- select.list(c('yes', 'no'))
+            continueLogic <- select.list(c('yes', 'no'), title='Continue Analysis?')
             if(continueLogic == 'yes'){
                 profileLoader()
             }

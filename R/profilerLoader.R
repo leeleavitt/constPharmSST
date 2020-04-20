@@ -21,6 +21,7 @@ profileLoader <- function(){
         
         # Give them a default searches to begin working with
         invisible(file.copy("./Misc/rawData/goTermSearch.txt", paste0("./profiles/",chosenProfile,'/searches')))
+        invisible(file.copy("./Misc/rawData/leeTermSearch.txt", paste0("./profiles/",chosenProfile,'/searches')))
     }
     setwd(paste0("./profiles/", chosenProfile))
 

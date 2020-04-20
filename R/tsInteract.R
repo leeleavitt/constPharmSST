@@ -103,7 +103,11 @@ tsInteract <- function(SETTINGS){
 
         # Returned biplot dimensions
         SETTINGS[[ 'biPlotDims' ]] <- NA
+        
+        # Scaling for geneDF
+        SETTINGS[[ 'newOptions' ]] <- 'log'
     }else{
+        formals(matrixWrangler)$scale <- SETTINGS[[ 'newOptions' ]]
         SETTINGS[[ 'heatMapFlag' ]] <- TRUE
         SETTINGS[[ 'renameFlag' ]] <- TRUE
         SETTINGS[[ 'geneDfFlag' ]] <- TRUE
@@ -275,7 +279,7 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
         }
         #' @param d Select cells 
-        if(keyPressed == 'd'){
+        if(keyPressed == 'c'){
             # Function to return ts_info_Reduced
             # Also returns selected cell_types
             dataSelectorReturn <- dataSelector(cellsSelection = SETTINGS[[ 'cellsSelection' ]])
@@ -419,10 +423,10 @@ tsInteract <- function(SETTINGS){
         if(keyPressed == 'n'){
             matrixWranglerOptions <-  c("row", "column", "none", "log")
             cat('\nHow would you like to scale the heatmap?\n')
-            newOptions <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
-            formals(matrixWrangler)$scale <- newOptions
+            SETTINGS[[ 'newOptions' ]] <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
+            formals(matrixWrangler)$scale <- SETTINGS[[ 'newOptions' ]]
 
-            if('log' %in% newOptions){
+            if('log' %in% SETTINGS[[ 'newOptions' ]]){
                 formals(tsBoxPlot)$log <- TRUE
             }else{
                 formals(tsBoxPlot)$log <- FALSE
@@ -478,10 +482,38 @@ tsInteract <- function(SETTINGS){
         }
 
         if(keyPressed == 'q'){
-            graphics.off()
             save(SETTINGS, file = "SETTINGS.Rdata")
-            setwd("..")
-            setwd("..")
+            graphics.off()
+            cat("\nWould you like to rename your profile?\n")
+            
+            renameLogic <- select.list(c('Yes', 'no'), title = "Rename Profile?")
+            if(renameLogic == 'yes'){
+                oldFolder <- rev(strsplit(getwd(), '/')[[1]])[1]
+                # Go back two directories
+                setwd("..")
+                setwd("..")
+                
+                # Get the new profile name
+                cat('\nEnter the name of your profile, buddy\n')
+                newFolder <- scan(what = 'character', n=1, quiet = T, sep=">")
+                
+                # New folder
+                newFolder <- paste0("./profiles/", newFolder)
+                dir.create(newFolder)
+                # Old folder
+                oldFolder <- paste0("./profiles/", oldFolder)
+                
+                # Make the savedCsv folder
+                file.copy(
+                    oldFolder,
+                    newFolder,
+                    recursive=TRUE
+                )
+                unlink(oldFolder, TRUE, TRUE)
+            }else{
+                setwd("..")
+                setwd("..")
+            }
         }
     }
 }

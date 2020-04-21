@@ -16,7 +16,7 @@ Pressing h will allow you to save your heatmap to a html table with conditional 
 ![][image2]
 
 ## Saving Gene List
-Perhaps you customly created a killer set of genes that you want to save and come back to later. This can be accomplished by pressing **`crtl-G`**.
+Perhaps you customly created a killer set of genes that you want to save and come back to later. This can be accomplished by pressing **`crtl-S`**.
 ![][image3]
 
 [image1]: ../howToGifs/25_saveCsv.gif

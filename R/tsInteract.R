@@ -530,7 +530,7 @@ tsInteract <- function(SETTINGS){
                 setwd("..")
 
                 # When done, delete the older folder!
-                unlink(oldFolder, TRUE, TRUE)
+                #unlink(oldFolder, TRUE, TRUE)
             }else{
                 setwd("..")
                 setwd("..")

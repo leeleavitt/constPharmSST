@@ -333,17 +333,17 @@ tsInteract <- function(SETTINGS){
                 }
 
                 # This is a place where i have 
-                if(dim(geneDF)[2] > 200){
+                #if(dim(geneDF)[2] > 200){
                     bringToTop(-1)
                     alarm()
                     cat("How Many genes should I return?\n")
                     toReturn <- scan(what = 'integer', n=1)
                     if(length(toReturn) == 0){
-                        toReturn <- 199
+                        toReturn <- dim(geneDF)[2]
                     }
-                }else{
-                    toReturn <- dim(geneDF)[2]
-                }
+                # }else{
+                #     toReturn <- dim(geneDF)[2]
+                # }
 
                 # Walk through the forest
                 rft <- randomForest::randomForest(geneDF, rfLabel)
@@ -368,19 +368,22 @@ tsInteract <- function(SETTINGS){
         #' @param g Select genes
         if(keyPressed == 'g'){
             toSearch <- searchSelector()
-            SETTINGS[[ 'genes' ]] <- unique(geneFinder(toSearch))
-            SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
-            cat("\nYour search returned\n\n", length(SETTINGS[[ 'genes' ]]),' Genes\n')
-            cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
-            if(length(SETTINGS[[ 'genes' ]]) < 50){
-                cat(SETTINGS[[ 'genes' ]], sep=" ")
-            }else{
-                cat(sample(SETTINGS[[ 'genes' ]])[1:50], sep=" ")
-                cat('\n')
-            }
-            SETTINGS[[ 'renameFlag' ]] <- TRUE
-            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
-            SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+            tryCatch({
+                SETTINGS[[ 'genes' ]] <- unique(geneFinder(toSearch))
+                SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
+                cat("\nYour search returned\n\n", length(SETTINGS[[ 'genes' ]]),' Genes\n')
+                cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
+                if(length(SETTINGS[[ 'genes' ]]) < 50){
+                    cat(SETTINGS[[ 'genes' ]], sep=" ")
+                }else{
+                    cat(sample(SETTINGS[[ 'genes' ]])[1:50], sep=" ")
+                    cat('\n')
+                }
+                SETTINGS[[ 'renameFlag' ]] <- TRUE
+                SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+                SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+            }, error=function(e)print('Could not find genes')
+            )
         }
 
         #' @param G Cleanup genes
@@ -442,6 +445,7 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'heatMapFlag' ]] <- TRUE 
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
             SETTINGS[[ 'geneDfFlag' ]] <- TRUE
+            SETTINGS[[ 'boxplotFlag' ]] <- TRUE
         }
 
         #' @param r Represent Cells with Different Names

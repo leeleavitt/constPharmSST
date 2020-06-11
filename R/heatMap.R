@@ -9,7 +9,7 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
     par(xpd=T)
     # add the gene label / x labels
     geneNames <- row.names(geneDF)
-    yloc <- rep(par('usr')[1] - yinch(.24), length(geneNames))
+    yloc <- rep(par('usr')[3] - yinch(.1), length(geneNames))
     xloc <- seq(0,1, length.out = length(geneNames))
     
     text_cex <- seq(1, .2, length.out=2000)
@@ -94,7 +94,9 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
 
     # Perform linear regression on genes if there are less than 100,
     tryCatch(
-        if(dim(geneDF)[1] < 200 & !is.na(labelForComparison) ){
+        #if(dim(geneDF)[1] < 200 & !is.na(labelForComparison) ){
+        if( !is.na(labelForComparison) ){
+
             labelsNew <- rev(labels) %in% labelForComparison
             
             geneSigLabels <- c()
@@ -106,7 +108,8 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
             geneSigLabels <- Reduce(c, geneSigLabels)
             
             # add the gene label / x labels
-            yloc <- rep(par('usr')[2] + yinch(.24), length(geneSigLabels))
+            yloc <- rep(par('usr')[4] + yinch(.2), length(geneSigLabels))
+            #yloc <- rep(par('usr')[4], length(geneSigLabels))
             xloc <- seq(0,1, length.out = length(geneSigLabels))
         
             text_cex <- seq(1, .2, length.out=2000)
@@ -120,8 +123,12 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
                 cex = text_cex[length(geneNames)],
                 col = ifelse(seq(1,length(geneSigLabels)) == geneSelected, 'red', 'black')
             )
+
+            cat("\nThe summary of significant genes is as follows\n")
+            print(summary(as.factor(geneSigLabels)))
+
         }
-        ,error= function(e) NULL
+        ,error= function(e) print("something did not go right during the randomforest")
     )
 }
 

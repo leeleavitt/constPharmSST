@@ -313,7 +313,7 @@ tsInteract <- function(SETTINGS){
 
         #' @param d Select cells 
         if(keyPressed == 'c'){
-            cat('\n##############################################\nKeyPressed: c')
+            cat('\n##############################################\nKeyPressed: c\n')
 
             # Function to return ts_info_Reduced
             # Also returns selected cell_types
@@ -368,7 +368,7 @@ tsInteract <- function(SETTINGS){
                 #if(dim(geneDF)[2] > 200){
                     bringToTop(-1)
                     alarm()
-                    cat("How Many genes should I return?\nPressing enter/entering nothing will return everything.")
+                    cat("How Many genes should I return?\nPressing enter/entering nothing will return everything.\n")
                     toReturn <- scan(what = 'integer', n=1)
                     if(length(toReturn) == 0){
                         toReturn <- dim(geneDF)[2]
@@ -475,7 +475,7 @@ tsInteract <- function(SETTINGS){
         
         #' @param l labels to observe groupings for the cells
         if(keyPressed == 'l'){
-            cat('\n##############################################\nKeyPressed: l')
+            cat('\n##############################################\nKeyPressed: l\n')
 
             # decide what labels to work with
             labelTypes <- grep("^label", names(SETTINGS[[ 'tsInfoReduce' ]]), value=T)

@@ -42,7 +42,6 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
         par(xpd=T)
     }else{
         color <- 'black'
-        print(color)
     }
 
     text(
@@ -108,10 +107,11 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
             geneSigLabels <- Reduce(c, geneSigLabels)
             
             # add the gene label / x labels
-            yloc <- rep(par('usr')[4] + yinch(.2), length(geneSigLabels))
+            yloc <- rep(par('usr')[4] + yinch(.1), length(geneSigLabels))
             #yloc <- rep(par('usr')[4], length(geneSigLabels))
             xloc <- seq(0,1, length.out = length(geneSigLabels))
         
+            par(xpd = T)
             text_cex <- seq(1, .2, length.out=2000)
             #plot(xloc~exp(10*text_cex), xlab = "number of labels", ylab = "labelSize")
             text(
@@ -123,7 +123,7 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
                 cex = text_cex[length(geneNames)],
                 col = ifelse(seq(1,length(geneSigLabels)) == geneSelected, 'red', 'black')
             )
-
+            
             cat("\nThe summary of significant genes is as follows\n")
             print(summary(as.factor(geneSigLabels)))
 

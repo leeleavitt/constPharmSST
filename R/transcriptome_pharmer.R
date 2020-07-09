@@ -339,23 +339,27 @@ geneGoFinder <- function(terms="neuron"){
 
 #' Smart Function to find genes either by gene names or 
 #' go terms
-geneFinder <- function(toSearch){
+geneFinder <- function(toSearch, goTerm = FALSE, geneName = TRUE){
     genes <- colnames(tsSuper$ts_data)
     if(length(toSearch) > 0){
         # First look for genes from go terms
         foundGenes <- c()
-        for(i in 1:length(toSearch)){
-            found <- sort(geneGoFinder(toSearch))
-            foundGenes <- c(found, foundGenes)
+        if(goTerm){
+            for(i in 1:length(toSearch)){
+                found <- sort(geneGoFinder(toSearch))
+                foundGenes <- c(found, foundGenes)
+            }
         }
 
         # next look for genes based on names
         #if(length(foundGenes) == 0){
-        for(i in 1:length(toSearch)){
-            found <- sort(grep(toSearch[i], genes, value = T, ignore.case = T), decreasing=T)
-            foundGenes <- c(found, foundGenes)
+        if(geneName){
+            for(i in 1:length(toSearch)){
+                found <- sort(grep(toSearch[i], genes, value = T, ignore.case = T), decreasing=T)
+                foundGenes <- c(found, foundGenes)
+            }
+            foundGenes <- rev(foundGenes)
         }
-        foundGenes <- rev(foundGenes)
     }
 
     # If no genes could be found
@@ -364,7 +368,7 @@ geneFinder <- function(toSearch){
     }else if(length(foundGenes) == 0){
         stop("Function found no genes.")
     }else{
-        print('These are the genes discovered')
+        cat('\nThese are the genes discovered:\n')
         return(foundGenes)
     }
 }

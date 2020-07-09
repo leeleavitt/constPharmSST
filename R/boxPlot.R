@@ -121,7 +121,7 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
     text(xloc, yloc, other_designations, pos=4, cex=.7)
 
     bringToTop(-1)
-    cat('\n\nOther designations\n\n')
+    #cat('\n\nOther designations\n\n')
     cat(strsplit(other_designations, "[|]")[[1]], sep='\n')
     cat('\n\n\n\n')
 
@@ -143,7 +143,7 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
     text(xloc, yloc, go_terms, pos=2, cex=.5)
     
     bringToTop(-1)
-    cat('\n\nGo Terms\n\n')
+    #cat('\n\nGo Terms\n\n')
     cat(strsplit(go_terms, "[|]")[[1]], sep='\n')
     cat('\n\n\n\n')
 

@@ -6,8 +6,11 @@ In this example I select proprioceptors/L1 only to analyze. Initally there doesn
 In this example i've start off with looking at all cell-types. In this labeling example we are unable to define whether the animal has undergone a chronic constriction injury to provoke a pain state. By pressing **`l`** I change my label to be both `label_experiment` and `label_cellType`. This operation combines these labels to creates the labels. From there, I perfomr randomforest for R13_ipsi vs all others. This analysis shows `MRAP` to be a significant gene postively expressed only in the R13 cell class. This could be a potential drug target for pain targeting.
 ![][image2]
 
+## Multiple label Selection
+You can select more than one label for the random forest analysis. This might be useful if you have a drug that hits two or three cell classes specifically. In this example I select L2(a-delta-LTMRS), and N14(c-LTMRS). This now shows me all genes that are expressed or not expressed exlcusively in these cell classes.
+![][image3]
 
 [image1]: ../howToGifs/28_advancedCellLabeling.gif
 [image2]: ../howToGifs/29_advancedCciAnalysis.gif
-
+[image3]: ../howToGifs/31_advancedTwoClassAnalysis.gif
 

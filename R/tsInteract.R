@@ -203,6 +203,7 @@ tsInteract <- function(SETTINGS){
 
         #' @param F1 makes the heatmap interactive
         if(keyPressed == 'F1'){
+            cat('\n##############################################\nKeyPressed F1')
             dev.set(hmWindow)
             clickLoc <- locator(n=1)
             
@@ -241,7 +242,7 @@ tsInteract <- function(SETTINGS){
                     {
                     cellName <- as.numeric(Reduce(c,strsplit(as.character(cellName), ',')))
                     cellName <- paste0("X.", cellName)
-                    print(cellName)
+                    #print(cellName)
                     LinesEvery.6(tsSuper$RD[[rdName]], cellName, dat.n = names(tsSuper$RD[rdName]))
                     }
                     ,error=function(e)NULL
@@ -261,6 +262,8 @@ tsInteract <- function(SETTINGS){
 
         #' @param F2 makes the biPlot interactive
         if(keyPressed == 'F2'){
+            cat('\n##############################################\nKeyPressed F2')
+
             dev.set(biPlotWindow)
             clickLoc <- identify(SETTINGS[[ 'biPlotDims' ]],n=1, labels='' )
             geneSelected <- row.names(SETTINGS[[ 'biPlotDims' ]])[clickLoc]
@@ -278,13 +281,40 @@ tsInteract <- function(SETTINGS){
             dev.set(tsWindow)
         }
         
+        #' @param F2 makes the biPlot interactive
+        if(keyPressed == 'F3'){
+            cat('\n##############################################\nKeyPressed F3')
+
+            # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
+            cat("\n1 vs All? [yes or no]\n")
+            compQuestion <- select.list(c('yes','no'), title='1 vs all?')                
+            # If you answer yes, now select the label for this
+            if(compQuestion == 'yes' | compQuestion != ''){
+                SETTINGS[[ 'labelForComparison' ]] <- select.list(
+                        levels(SETTINGS[[ 'labelConcat' ]]), 
+                        multiple = TRUE, 
+                        preselect = SETTINGS[[ 'labelForComparison' ]], 
+                        title = "Select your label"
+                    )
+                formals(tsBoxPlot)$labelForComparison <- SETTINGS[[ 'labelForComparison' ]]
+                formals(tsHeatMap)$labelForComparison <- SETTINGS[[ 'labelForComparison' ]]        
+            }    
+            SETTINGS[[ 'boxPlotFlag' ]] <- TRUE
+            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+
+            dev.set(tsWindow)
+        }
 
         if(keyPressed == 'b'){
+            cat('\n##############################################\nKeyPressed: b')
+
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
         }
 
         #' @param d Select cells 
         if(keyPressed == 'c'){
+            cat('\n##############################################\nKeyPressed: c\n')
+
             # Function to return ts_info_Reduced
             # Also returns selected cell_types
             dataSelectorReturn <- dataSelector(cellsSelection = SETTINGS[[ 'cellsSelection' ]])
@@ -312,6 +342,8 @@ tsInteract <- function(SETTINGS){
         
         #' @param f random forest 
         if(keyPressed == 'f'){
+            cat('\n##############################################\nKeyPressed f')
+
             # Do a quick and easy random forest
             if(nlevels(SETTINGS[[ 'labelConcat' ]]) > 1 ){
                 # Now once we enter the randomForest, should we do all vs all, or 1 vs all?
@@ -333,17 +365,17 @@ tsInteract <- function(SETTINGS){
                 }
 
                 # This is a place where i have 
-                if(dim(geneDF)[2] > 200){
+                #if(dim(geneDF)[2] > 200){
                     bringToTop(-1)
                     alarm()
-                    cat("How Many genes should I return?\n")
+                    cat("How Many genes should I return?\nPressing enter/entering nothing will return everything.\n")
                     toReturn <- scan(what = 'integer', n=1)
                     if(length(toReturn) == 0){
-                        toReturn <- 199
+                        toReturn <- dim(geneDF)[2]
                     }
-                }else{
-                    toReturn <- dim(geneDF)[2]
-                }
+                # }else{
+                #     toReturn <- dim(geneDF)[2]
+                # }
 
                 # Walk through the forest
                 rft <- randomForest::randomForest(geneDF, rfLabel)
@@ -367,24 +399,55 @@ tsInteract <- function(SETTINGS){
 
         #' @param g Select genes
         if(keyPressed == 'g'){
+            cat('\n##############################################\nKeyPressed: g')
+
             toSearch <- searchSelector()
-            SETTINGS[[ 'genes' ]] <- unique(geneFinder(toSearch))
-            SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
-            cat("\nYour search returned\n\n", length(SETTINGS[[ 'genes' ]]),' Genes\n')
-            cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
-            if(length(SETTINGS[[ 'genes' ]]) < 50){
-                cat(SETTINGS[[ 'genes' ]], sep=" ")
-            }else{
-                cat(sample(SETTINGS[[ 'genes' ]])[1:50], sep=" ")
-                cat('\n')
-            }
-            SETTINGS[[ 'renameFlag' ]] <- TRUE
-            SETTINGS[[ 'heatMapFlag' ]] <- TRUE
-            SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+            tryCatch({
+                cat('\nSelect the search to return genes.\nIf your search has no terms all genes will be returned')
+                SETTINGS[[ 'genes' ]] <- unique(geneFinder(toSearch, goTerm = FALSE, geneName = TRUE))
+                SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
+                cat("\nYour search returned\n\n", length(SETTINGS[[ 'genes' ]]),' Genes\n')
+                cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
+                if(length(SETTINGS[[ 'genes' ]]) < 50){
+                    cat(SETTINGS[[ 'genes' ]], sep=" ")
+                }else{
+                    cat(sample(SETTINGS[[ 'genes' ]])[1:50], sep=" ")
+                    cat('\n')
+                }
+                SETTINGS[[ 'renameFlag' ]] <- TRUE
+                SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+                SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+            }, error=function(e)print('Could not find genes')
+            )
         }
+        
+        #' @param crtl-G Search Genes through go terms 
+        if(keyPressed == 'ctrl-G'){
+            cat('\n##############################################\nKeyPressed: ctrl-G')
+            toSearch <- searchSelector()
+            tryCatch({
+                cat('\nGoTerm and GeneSearch. This will be slow if you have a lot of search terms\n\nSelect the search to return genes.\nIf your search has no terms all genes will be returned\n')
+                SETTINGS[[ 'genes' ]] <- unique(geneFinder(toSearch, goTerm = TRUE, geneName = TRUE))
+                SETTINGS[[ 'geneSubset' ]] <- SETTINGS[[ 'genes' ]]
+                cat("\nYour search returned\n\n", length(SETTINGS[[ 'genes' ]]),' Genes\n')
+                cat('\nThese are the genes that have come up after your search\nRemember you can press "G" to cleanup those genes that you have selected\n\n')
+                if(length(SETTINGS[[ 'genes' ]]) < 50){
+                    cat(SETTINGS[[ 'genes' ]], sep=" ")
+                }else{
+                    cat(sample(SETTINGS[[ 'genes' ]])[1:50], sep=" ")
+                    cat('\n')
+                }
+                SETTINGS[[ 'renameFlag' ]] <- TRUE
+                SETTINGS[[ 'heatMapFlag' ]] <- TRUE
+                SETTINGS[[ 'biPlotFlag' ]] <- TRUE
+            }, error=function(e)print('Could not find genes')
+            )
+        }
+
 
         #' @param G Cleanup genes
         if(keyPressed == 'G'){
+            cat('\n##############################################\nKeyPressed: G')
             cat('\nSelect a subset of genes from this list of genes\nRemeber you can press cancel to return the same genes\n')
             tryCatch(
                 SETTINGS[[ 'geneSubset' ]] <- select.list(SETTINGS[[ 'genes' ]], SETTINGS[[ 'geneSubset' ]], multiple=T),
@@ -403,14 +466,17 @@ tsInteract <- function(SETTINGS){
 
         #' @param h make html heatmap
         if(keyPressed == 'h'){
+            cat('\n##############################################\nKeyPressed: h')
             cat('\nI\'m busy plotting, my friend\n')
             geneDF <- apply(geneDF, 2, rev)
             heatMapper(geneDF)
-            print(get('cf', .GlobalEnv))
+            #print(get('cf', .GlobalEnv))
         }
         
         #' @param l labels to observe groupings for the cells
         if(keyPressed == 'l'){
+            cat('\n##############################################\nKeyPressed: l\n')
+
             # decide what labels to work with
             labelTypes <- grep("^label", names(SETTINGS[[ 'tsInfoReduce' ]]), value=T)
             # select the label/labels
@@ -429,6 +495,7 @@ tsInteract <- function(SETTINGS){
         
         #' @param n normalization Save the gene list you have updated 
         if(keyPressed == 'n'){
+            cat('\n##############################################\nKeyPressed: n')
             matrixWranglerOptions <-  c("row", "column", "none", "log")
             cat('\nHow would you like to scale the heatmap?\n')
             SETTINGS[[ 'newOptions' ]] <- select.list(matrixWranglerOptions, multiple=T, "Normalization")
@@ -442,10 +509,12 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'heatMapFlag' ]] <- TRUE 
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
             SETTINGS[[ 'geneDfFlag' ]] <- TRUE
+            SETTINGS[[ 'boxplotFlag' ]] <- TRUE
         }
 
         #' @param r Represent Cells with Different Names
         if(keyPressed == 'r'){
+            cat('\n##############################################\nKeyPressed: r')
             if(length(SETTINGS[[ 'tsInfoReduce' ]]) > 0){
                 cat("\nThis function displays the represenation of the cells with the collumn\nvalues from the ts_info\n")
                 SETTINGS[[ 'cellRep' ]] <- select.list(SETTINGS[[ 'cellRepOptions' ]], SETTINGS[[ 'cellRep' ]], multiple = T, "Select Cell Represenation")
@@ -463,6 +532,7 @@ tsInteract <- function(SETTINGS){
 
         #' @param s Save the Current geneDF as a csv to continue work outside
         if(keyPressed == 's'){
+            cat('\n##############################################\nKeyPressed: s')
             if(!is.null(geneDF)){
                 cat('\nPlease enter the name of the file\n')
                 bringToTop(-1)
@@ -475,6 +545,7 @@ tsInteract <- function(SETTINGS){
 
         #' @param ctrl-S Save the gene list you have updated 
         if(keyPressed == 'ctrl-S'){
+            cat('\n##############################################\nKeyPressed: ctrl-S')
             geneFileName <- scan(n=1, what='character')
             geneFileName <- paste0("./searches/", geneFileName, '.txt')
             write.table(SETTINGS[[ 'genes' ]][ SETTINGS[[ 'genes' ]] %in% SETTINGS[[ 'geneSubset' ]] ], file = geneFileName, sep='\n', quote=F, col.names=FALSE, row.names = FALSE)
@@ -482,6 +553,7 @@ tsInteract <- function(SETTINGS){
         
         #' @param v Singular-vector chooser
         if(keyPressed == 'v'){
+            cat('\n##############################################\nKeyPressed: s')
             bringToTop(-1)
             cat("Select the singular vectors that you\nwould like to observe\non the biplot\n")
             Sys.sleep(0.5)
@@ -490,7 +562,10 @@ tsInteract <- function(SETTINGS){
             SETTINGS[[ 'biPlotFlag' ]] <- TRUE
         }
 
+
         if(keyPressed == 'q'){
+            cat('\n##############################################\nKeyPressed: q')
+
             save(SETTINGS, file = "SETTINGS.Rdata")
             graphics.off()
             cat("\nWould you like to rename your profile?\n")
@@ -530,7 +605,7 @@ tsInteract <- function(SETTINGS){
                 setwd("..")
 
                 # When done, delete the older folder!
-                unlink(oldFolder, TRUE, TRUE)
+                #unlink(oldFolder, TRUE, TRUE)
             }else{
                 setwd("..")
                 setwd("..")

@@ -1,5 +1,11 @@
 # Transcriptome Surfer
-This a package developed to combine calcium imaging data with single cell transcriptomic data. To install this software on your local computer please follow these [instructions](./Misc/keyBoardWalkthroughs/installation.md).
+
+**NOT COMPATIBLE WITH MAC**
+
+This a package developed to combine calcium imaging data with single cell transcriptomic data. To install this software on your local computer please follow these [instructions](./Misc/keyBoardWalkthroughs/installation.md). It is also highly reccomended you learn [regular expressions](https://regex101.com/). Making a new profile will automatically save two different gene searches into the `./profiles/yourProfile/searches`. Look at it for examples of how to search. Also, feel free to delete these files.
+# Transcriptome Pharmer
+This a package developed to combine calcium imaging data with single cell transcriptomic data. To install this software on your local computer or on the shared drive please follow these [instructions](./Misc/keyBoardWalkthroughs/installation.md). It is also highly reccomended you learn [regular expressions](https://regex101.com/). Making a new profile will automatically save two different gene searches into the `./profiles/yourProfile/searches`. Look at it for examples of how to search. Also, feel free to delete these files.
+
 1. To get started on using this software navigate to the directory and simply double click `clickMe.Rdata`. This will open an R console, and load in all software and data.
 ![][image1]
 2. The first question that will be asked is what profile you would like to use. If you want to make a new profile simply click **New profile** or click **Cancel**. 
@@ -23,7 +29,7 @@ This a package developed to combine calcium imaging data with single cell transc
        1. **RandomForest** against selected labels to rank genes in terms of importance
        2. Using linear regression to identify statistical significance of difference across all labels vs selected label.
     3. [Saving and reloading](./Misc/keyBoardWalkthroughs/saving.md)
-    4. To gain insite for how you can potentially use this, check out the [advanced examples](./Misc/advancedExamples.md) page.
+    4. To gain insite for how you can potentially use this, check out the [advanced examples](./Misc/keyBoardWalkthroughs/advancedExamples.md) page.
 
 
 

@@ -41,7 +41,7 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
 
     # Potential xlab; paste0(gsub("^label_","",labels), collapse=" & ")
     # boxplot
-    par(bty = 'l', mar = c(10, 4, 4, 1) )
+    par(bty = 'l', mar = c(10, 4, 4, 7) )
     bpDims <- boxplot(
         geneDF ~ labelConcat,
         bty = 'l',
@@ -121,9 +121,32 @@ tsBoxPlot <- function(geneDF, gene = 'Kcnc1', log = TRUE, labels = NULL, labelFo
     text(xloc, yloc, other_designations, pos=4, cex=.7)
 
     bringToTop(-1)
-    cat('\n\n\n\n')
+    #cat('\n\nOther designations\n\n')
     cat(strsplit(other_designations, "[|]")[[1]], sep='\n')
     cat('\n\n\n\n')
+
+    # Add gene go terms
+    go_terms <- as.character(tsSuper$gene.go[tsSuper$gene.go$Gene.name == gene, 'GO.term.name'])
+    go_terms <- unique(go_terms)
+    go_terms <- paste0(go_terms, collapse = '\n')
+
+
+    if(length(go_terms) == 0){
+        go_terms <- 'NA'
+    }else{
+        go_terms <- paste0('Go terms: \n', go_terms)
+        #other_designations <- gsub('[|]','\n',go_terms)
+    }
+    xloc <- par('usr')[2] + xinch(1.3)
+    yloc <- par('usr')[3] - yinch(.5)
+    par(xpd=T)
+    text(xloc, yloc, go_terms, pos=2, cex=.5)
+    
+    bringToTop(-1)
+    #cat('\n\nGo Terms\n\n')
+    cat(strsplit(go_terms, "[|]")[[1]], sep='\n')
+    cat('\n\n\n\n')
+
 
     # perform kevins regression analysis
     if(!is.na(labelForComparison) | length(labelForComparison) > 2){

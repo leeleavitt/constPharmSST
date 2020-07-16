@@ -12,5 +12,6 @@ You can select more than one label for the random forest analysis. This might be
 
 [image1]: ../howToGifs/28_advancedCellLabeling.gif
 [image2]: ../howToGifs/29_advancedCciAnalysis.gif
+[image2]: ../howToGifs/34_InteractiveLabeling.gif
 [image3]: ../howToGifs/31_advancedTwoClassAnalysis.gif
 

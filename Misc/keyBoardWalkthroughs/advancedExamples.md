@@ -10,6 +10,15 @@ In this example i've start off with looking at all cell-types. In this labeling 
 You can select more than one label for the random forest analysis. This might be useful if you have a drug that hits two or three cell classes specifically. In this example I select L2(a-delta-LTMRS), and N14(c-LTMRS). This now shows me all genes that are expressed or not expressed exlcusively in these cell classes.
 ![][image3]
 
+## Total Gene Analysis
+The software now supports analysis on the entirety of the genetic data. To perform this analysis.
+
+  1. Add text file to the search in your profile which does not contain any terms
+  2. Press <kbd>g</kbd> and select this empty search. This will return all gene discovered during the transcriptomics.
+  3. Now that all gene are returned performing random forest analysis will be performed on all genes. <kbd>f</kbd>
+  4. To work through all genes during it is useful to simply press <kbd>shift</kbd><kbd>g</kbd>. The genes are sorted based on the random forest. At this time the biplot become most useful for understanding the genes which play a positive role in defining the cell class (these genes will be closest to the cells of interest), vs the genes which play a negative role in defining the cell class(these gene will be furthest away and opposing the cell class).
+
+
 [image1]: ../howToGifs/28_advancedCellLabeling.gif
 [image2]: ../howToGifs/29_advancedCciAnalysis.gif
 [image2]: ../howToGifs/34_InteractiveLabeling.gif

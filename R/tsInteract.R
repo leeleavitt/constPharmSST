@@ -154,6 +154,7 @@ tsInteract <- function(SETTINGS){
         # This creates the new gene data frame
         if(SETTINGS[[ 'geneDfFlag' ]]){
             if(length(SETTINGS[[ 'genes' ]]) > 0 & length(SETTINGS[[ 'libraryNames' ]]) > 0){
+                
                 geneDF <- tsSuper$ts_data[SETTINGS[[ 'libraryNames' ]], SETTINGS[[ 'genes' ]][ SETTINGS[[ 'genes' ]] %in% SETTINGS[[ 'geneSubset' ]] ],drop=F]
                 geneDF <- matrixWrangler(geneDF)
                 row.names(geneDF) <- SETTINGS[[ 'newLibraryNames' ]]
@@ -168,6 +169,7 @@ tsInteract <- function(SETTINGS){
         if(SETTINGS[[ 'heatMapFlag' ]]){
             if(length(SETTINGS[[ 'genes' ]]) > 0 & length(SETTINGS[[ 'libraryNames' ]]) > 0){            
                 dev.set(hmWindow)
+                formals(tsHeatMap)$libraryNames <- SETTINGS[[ 'libraryNames' ]]
                 tsHeatMap(geneDF)    
                 dev.set(tsWindow)
                 SETTINGS[[ 'heatMapFlag' ]] <- FALSE
@@ -478,7 +480,7 @@ tsInteract <- function(SETTINGS){
             cat('\n##############################################\nKeyPressed: l\n')
 
             # decide what labels to work with
-            labelTypes <- grep("^label", names(SETTINGS[[ 'tsInfoReduce' ]]), value=T)
+            labelTypes <- c("Gnomex.Label", grep("^label", names(SETTINGS[[ 'tsInfoReduce' ]]), value=T))
             # select the label/labels
             SETTINGS[[ 'cellRep' ]] <- select.list(labelTypes, multiple = T, 'Select label/s')
             SETTINGS[[ 'renameFlag' ]] <- TRUE

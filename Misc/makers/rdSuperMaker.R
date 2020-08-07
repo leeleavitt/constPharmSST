@@ -1,11 +1,11 @@
 # The first thing we need to do is make a data base of all cells for each 
 require(xlsx)
-ts_info <- read.xlsx("./leeProcessing/rawData/FX SS library data 200218.xlsx",1)
-source("./leeProcessing/transcriptome_pharmer.r")
+ts_info <- read.xlsx("./rawData/FX SS library data 200218.xlsx",1)
+source("./R/transcriptome_pharmer.r")
 tsInfoClean <- tsInfoCleaner(ts_info)
 
 # Now lets change our Directory to where the experiments are saved
-mainDir <- "C:/Users/leele/Documents/sst/"
+mainDir <- ".."
 expDirs <- "Z:/Lee Leavitt/Cell Picking/"
 
 setwd(expDirs)
@@ -56,5 +56,5 @@ for( i in c(1:12, 14:length(uniqueExpDirs))){
     setwd(expDirs)
 }
 
-setwd(mainDir)
-save(rdSuper, file='./leeProcessing/rawData/rdSuper.Rdata')
+#setwd(mainDir)
+save(rdSuper, file='./rawData/rdSuper.Rdata')

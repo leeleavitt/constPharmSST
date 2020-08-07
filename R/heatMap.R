@@ -1,5 +1,5 @@
 # To click in the heatmap
-tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA, cellSelected = NA, labelForComparison = NA){
+tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA, cellSelected = NA, labelForComparison = NA, libraryNames = NA){
     geneDF <- apply(geneDF, 2, rev)
 
     geneDF <- t(geneDF)
@@ -7,6 +7,7 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
     image(geneDF, yaxt='n', xaxt='n', bty='n')
 
     par(xpd=T)
+
     # add the gene label / x labels
     geneNames <- row.names(geneDF)
     yloc <- rep(par('usr')[3] - yinch(.1), length(geneNames))
@@ -53,6 +54,26 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
         col = ifelse(rev(labels) %in% labelForComparison , 'red', color) , 
         font= ifelse(rev(labels) %in% labelForComparison , 2, 1)
     )
+
+    # add the million reads to the right of the heat map
+    if(!is.na( libraryNames )){
+        cellNames <- colnames(geneDF)
+        xloc <- rep(par('usr')[2] + xinch(.1), length(libraryNames))
+        yloc <- seq(0,1, length.out = length(libraryNames))
+        cells_cex <- seq(1,.4, length.out=91) 
+    }
+
+    text(
+        xloc, 
+        yloc, 
+        tsSuper$ts_info[libraryNames,'M.Assigned'], 
+        adj=0, 
+        cex = cells_cex[length(cellNames)], 
+        col = "black", 
+        font= ifelse(rev(labels) %in% labelForComparison , 2, 1)
+    )
+
+
 
     # add rectangular box surrouynding the selected geneName
     tryCatch(

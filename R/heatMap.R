@@ -73,8 +73,6 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
         font= ifelse(rev(labels) %in% labelForComparison , 2, 1)
     )
 
-
-
     # add rectangular box surrouynding the selected geneName
     tryCatch(
         if( !is.na(geneSelected) ){
@@ -134,6 +132,7 @@ tsHeatMap <- function(geneDF, scale = c('none'), labels = NA, geneSelected = NA,
         
             par(xpd = T)
             text_cex <- seq(1, .2, length.out=2000)
+            print(text_cex)
             #plot(xloc~exp(10*text_cex), xlab = "number of labels", ylab = "labelSize")
             text(
                 xloc, 

@@ -1,5 +1,5 @@
 # Making the DataSet for Transcriptome pharming
-require(procPharm)
+#require(procPharm)
 source('./R/transcriptome_pharmer.r')
 
 # Load up the suepr data
@@ -9,7 +9,7 @@ names(rdSuper)[9] <- 'RD.180613.43.m.p1'
 
 # Load and Clean the transcriptome info
 # The first thing we need to do is make a data base of all cells for each 
-ts_info <- xlsx::read.xlsx("./Misc/rawData/FX SS library data 200218.xlsx",1)
+ts_info <- xlsx::read.xlsx("./Misc/rawData/FX SS library data 200723.xlsx",1)
 ts_info <- tsInfoCleaner(ts_info)
 
 # load in the tsData
@@ -64,4 +64,4 @@ tsSuper[['gene_info']] <- gene_info
 tsSuper[['gene.desc']] <- mouse.gene.desc
 # Gene go terms,
 tsSuper[['gene.go']] <- mouse.gene.go
-save(tsSuper, file='./tsSuper.Rdata')
+save(tsSuper, file='./Misc/rawData/tsSuper.Rdata')
